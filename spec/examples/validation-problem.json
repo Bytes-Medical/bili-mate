@@ -1,0 +1,15 @@
+{
+  "type": "https://api.bili-mate.uk/problems/validation-failed",
+  "title": "Assessment validation failed",
+  "status": 422,
+  "detail": "One or more fields are invalid. No clinical evaluation was performed.",
+  "instance": "urn:bili-mate:request:example-invalid-001",
+  "code": "VALIDATION_FAILED",
+  "errors": [
+    {
+      "pointer": "/measurements/1/age_minutes",
+      "code": "DUPLICATE_MEASUREMENT_AGE",
+      "message": "Measurement ages must be unique within an assessment."
+    }
+  ]
+}

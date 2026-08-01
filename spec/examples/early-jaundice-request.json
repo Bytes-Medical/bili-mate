@@ -1,0 +1,33 @@
+{
+  "rule_pack_id": "nice-cg98-2023-10-31.1",
+  "gestational_age_completed_weeks": 39,
+  "assessment_age_minutes": 600,
+  "clinical_features": {
+    "suspected_or_obvious_jaundice": "present",
+    "visible_jaundice": "present",
+    "clinically_well": "present",
+    "acute_bilirubin_encephalopathy": "absent",
+    "pale_chalky_stools": "absent",
+    "dark_urine_stains_nappy": "absent",
+    "rhesus_haemolytic_disease": "absent",
+    "abo_haemolytic_disease": "absent",
+    "infection_suspected": "absent",
+    "urinary_tract_infection_suspected": "absent",
+    "routine_metabolic_screen_completed": "unknown"
+  },
+  "risk_factors": {
+    "previous_sibling_required_phototherapy": "absent",
+    "exclusive_breastfeeding_intended": "present"
+  },
+  "measurements": [
+    {
+      "id": "early1",
+      "age_minutes": 600,
+      "total_bilirubin_umol_l": 120,
+      "method": "serum"
+    }
+  ],
+  "treatment_state": {
+    "mode": "none"
+  }
+}

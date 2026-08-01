@@ -1,0 +1,924 @@
+openapi: 3.1.0
+info:
+  title: Bili Mate Clinical Decision Support API
+  version: 1.0.0-draft
+  summary: Stateless NICE CG98 neonatal jaundice decision support for UK healthcare professionals.
+  description: |
+    This API is professional clinical decision support, not an autonomous diagnosis or
+    treatment system. It stores no patient assessment record and accepts no direct patient
+    identifiers. Clinical use requires an approved active rule pack and release authorisation.
+  contact:
+    name: Bili Mate clinical safety contact
+    url: https://bili-mate.uk/clinical-safety
+  license:
+    name: Product licence and NICE content notices
+    url: https://bili-mate.uk/legal
+servers:
+  - url: https://api.bili-mate.uk
+    description: UK production
+tags:
+  - name: Guidelines
+  - name: Evaluations
+  - name: Legal
+  - name: Health
+paths:
+  /v1/guidelines/active:
+    get:
+      operationId: getActiveGuideline
+      tags: [Guidelines]
+      summary: Get the active clinical rule pack
+      responses:
+        "200":
+          description: Active rule-pack metadata
+          headers:
+            X-Request-ID:
+              $ref: "#/components/headers/RequestId"
+            Cache-Control:
+              schema:
+                type: string
+              example: public, max-age=3600
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RulePackMetadata"
+        "503":
+          $ref: "#/components/responses/Unavailable"
+  /v1/evaluations:
+    post:
+      operationId: evaluateJaundiceAssessment
+      tags: [Evaluations]
+      summary: Evaluate one transient neonatal jaundice assessment
+      parameters:
+        - $ref: "#/components/parameters/OptionalRequestId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EvaluationRequest"
+      responses:
+        "200":
+          description: Completed deterministic evaluation
+          headers:
+            X-Request-ID:
+              $ref: "#/components/headers/RequestId"
+            Cache-Control:
+              schema:
+                type: string
+              example: no-store
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EvaluationResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "409":
+          $ref: "#/components/responses/RulePackConflict"
+        "413":
+          $ref: "#/components/responses/PayloadTooLarge"
+        "422":
+          $ref: "#/components/responses/ValidationFailed"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+        "500":
+          $ref: "#/components/responses/InternalFailure"
+        "503":
+          $ref: "#/components/responses/Unavailable"
+  /v1/threshold-curves/{rule_pack_id}:
+    get:
+      operationId: getThresholdCurve
+      tags: [Guidelines]
+      summary: Get non-patient display points for one gestational age
+      parameters:
+        - name: rule_pack_id
+          in: path
+          required: true
+          schema:
+            $ref: "#/components/schemas/RulePackId"
+        - name: gestational_age_completed_weeks
+          in: query
+          required: true
+          schema:
+            $ref: "#/components/schemas/GestationalWeeks"
+        - name: resolution_minutes
+          in: query
+          required: false
+          schema:
+            type: integer
+            enum: [1, 5, 15, 30, 60]
+            default: 60
+      responses:
+        "200":
+          description: Threshold curve display points
+          headers:
+            X-Request-ID:
+              $ref: "#/components/headers/RequestId"
+            Cache-Control:
+              schema:
+                type: string
+              example: public, max-age=3600
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ThresholdCurve"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/RulePackConflict"
+        "422":
+          $ref: "#/components/responses/ValidationFailed"
+  /v1/legal:
+    get:
+      operationId: getLegalNotices
+      tags: [Legal]
+      summary: Get current intended-use, content and privacy notices
+      responses:
+        "200":
+          description: Legal and clinical-use notices
+          headers:
+            X-Request-ID:
+              $ref: "#/components/headers/RequestId"
+            Cache-Control:
+              schema:
+                type: string
+              example: public, max-age=3600
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LegalNotices"
+  /health/live:
+    get:
+      operationId: getLiveness
+      tags: [Health]
+      summary: Process liveness
+      responses:
+        "200":
+          description: Process is live
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthStatus"
+  /health/ready:
+    get:
+      operationId: getReadiness
+      tags: [Health]
+      summary: Clinical engine readiness
+      responses:
+        "200":
+          description: Service is ready
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthStatus"
+        "503":
+          $ref: "#/components/responses/Unavailable"
+components:
+  parameters:
+    OptionalRequestId:
+      name: X-Request-ID
+      in: header
+      required: false
+      schema:
+        type: string
+        minLength: 1
+        maxLength: 64
+        pattern: "^[\\x20-\\x7E]+$"
+  headers:
+    RequestId:
+      required: true
+      schema:
+        type: string
+        minLength: 1
+        maxLength: 64
+  responses:
+    BadRequest:
+      description: Malformed request
+      headers:
+        X-Request-ID:
+          $ref: "#/components/headers/RequestId"
+      content:
+        application/problem+json:
+          schema:
+            $ref: "#/components/schemas/Problem"
+    RulePackConflict:
+      description: Requested rule pack cannot be evaluated
+      headers:
+        X-Request-ID:
+          $ref: "#/components/headers/RequestId"
+      content:
+        application/problem+json:
+          schema:
+            $ref: "#/components/schemas/Problem"
+    PayloadTooLarge:
+      description: Request body exceeds the limit
+      headers:
+        X-Request-ID:
+          $ref: "#/components/headers/RequestId"
+      content:
+        application/problem+json:
+          schema:
+            $ref: "#/components/schemas/Problem"
+    ValidationFailed:
+      description: Schema or domain validation failed
+      headers:
+        X-Request-ID:
+          $ref: "#/components/headers/RequestId"
+      content:
+        application/problem+json:
+          schema:
+            $ref: "#/components/schemas/Problem"
+    RateLimited:
+      description: Rate limit exceeded
+      headers:
+        X-Request-ID:
+          $ref: "#/components/headers/RequestId"
+        Retry-After:
+          schema:
+            type: integer
+            minimum: 1
+      content:
+        application/problem+json:
+          schema:
+            $ref: "#/components/schemas/Problem"
+    InternalFailure:
+      description: Unexpected internal safety failure
+      headers:
+        X-Request-ID:
+          $ref: "#/components/headers/RequestId"
+      content:
+        application/problem+json:
+          schema:
+            $ref: "#/components/schemas/Problem"
+    Unavailable:
+      description: Clinical engine is unavailable
+      headers:
+        X-Request-ID:
+          $ref: "#/components/headers/RequestId"
+        Retry-After:
+          schema:
+            type: integer
+            minimum: 1
+      content:
+        application/problem+json:
+          schema:
+            $ref: "#/components/schemas/Problem"
+    NotFound:
+      description: Resource not found
+      headers:
+        X-Request-ID:
+          $ref: "#/components/headers/RequestId"
+      content:
+        application/problem+json:
+          schema:
+            $ref: "#/components/schemas/Problem"
+  schemas:
+    RulePackId:
+      type: string
+      minLength: 1
+      maxLength: 64
+      pattern: "^[a-z0-9][a-z0-9.-]{0,63}$"
+      example: nice-cg98-2023-10-31.1
+    GestationalWeeks:
+      type: integer
+      minimum: 23
+      maximum: 42
+      example: 38
+    AgeMinutes:
+      type: integer
+      minimum: 0
+      maximum: 40319
+      example: 2880
+    BilirubinUmolL:
+      type: integer
+      minimum: 0
+      maximum: 1000
+      example: 245
+    TriState:
+      type: string
+      enum: [present, absent, unknown]
+    MeasurementMethod:
+      type: string
+      enum: [serum, transcutaneous]
+    TreatmentMode:
+      type: string
+      enum: [none, phototherapy, intensified_phototherapy, post_phototherapy, post_exchange]
+    Priority:
+      type: string
+      enum: [emergency, immediate, urgent, treatment, timed, routine]
+    ThresholdRelation:
+      type: string
+      enum: [below, at, above, not_available]
+    ClinicalFeatures:
+      type: object
+      additionalProperties: false
+      required:
+        - suspected_or_obvious_jaundice
+        - visible_jaundice
+        - clinically_well
+        - acute_bilirubin_encephalopathy
+        - pale_chalky_stools
+        - dark_urine_stains_nappy
+        - rhesus_haemolytic_disease
+        - abo_haemolytic_disease
+        - infection_suspected
+        - urinary_tract_infection_suspected
+        - routine_metabolic_screen_completed
+      properties:
+        suspected_or_obvious_jaundice:
+          $ref: "#/components/schemas/TriState"
+        visible_jaundice:
+          $ref: "#/components/schemas/TriState"
+        clinically_well:
+          $ref: "#/components/schemas/TriState"
+        acute_bilirubin_encephalopathy:
+          $ref: "#/components/schemas/TriState"
+        pale_chalky_stools:
+          $ref: "#/components/schemas/TriState"
+        dark_urine_stains_nappy:
+          $ref: "#/components/schemas/TriState"
+        rhesus_haemolytic_disease:
+          $ref: "#/components/schemas/TriState"
+        abo_haemolytic_disease:
+          $ref: "#/components/schemas/TriState"
+        infection_suspected:
+          $ref: "#/components/schemas/TriState"
+        urinary_tract_infection_suspected:
+          $ref: "#/components/schemas/TriState"
+        routine_metabolic_screen_completed:
+          $ref: "#/components/schemas/TriState"
+    RiskFactors:
+      type: object
+      additionalProperties: false
+      required:
+        - previous_sibling_required_phototherapy
+        - exclusive_breastfeeding_intended
+      properties:
+        previous_sibling_required_phototherapy:
+          $ref: "#/components/schemas/TriState"
+        exclusive_breastfeeding_intended:
+          $ref: "#/components/schemas/TriState"
+    Measurement:
+      type: object
+      additionalProperties: false
+      required: [id, age_minutes, total_bilirubin_umol_l, method]
+      properties:
+        id:
+          type: string
+          minLength: 1
+          maxLength: 32
+          pattern: "^[A-Za-z0-9_-]+$"
+        age_minutes:
+          $ref: "#/components/schemas/AgeMinutes"
+        total_bilirubin_umol_l:
+          $ref: "#/components/schemas/BilirubinUmolL"
+        method:
+          $ref: "#/components/schemas/MeasurementMethod"
+    TreatmentState:
+      type: object
+      additionalProperties: false
+      required: [mode]
+      properties:
+        mode:
+          $ref: "#/components/schemas/TreatmentMode"
+        started_age_minutes:
+          anyOf:
+            - $ref: "#/components/schemas/AgeMinutes"
+            - type: "null"
+        stopped_age_minutes:
+          anyOf:
+            - $ref: "#/components/schemas/AgeMinutes"
+            - type: "null"
+        exchange_completed_age_minutes:
+          anyOf:
+            - $ref: "#/components/schemas/AgeMinutes"
+            - type: "null"
+    EvaluationRequest:
+      type: object
+      additionalProperties: false
+      required:
+        - rule_pack_id
+        - gestational_age_completed_weeks
+        - assessment_age_minutes
+        - clinical_features
+        - risk_factors
+        - measurements
+        - treatment_state
+      properties:
+        rule_pack_id:
+          $ref: "#/components/schemas/RulePackId"
+        gestational_age_completed_weeks:
+          $ref: "#/components/schemas/GestationalWeeks"
+        assessment_age_minutes:
+          $ref: "#/components/schemas/AgeMinutes"
+        clinical_features:
+          $ref: "#/components/schemas/ClinicalFeatures"
+        risk_factors:
+          $ref: "#/components/schemas/RiskFactors"
+        measurements:
+          type: array
+          maxItems: 64
+          items:
+            $ref: "#/components/schemas/Measurement"
+        conjugated_bilirubin_umol_l:
+          anyOf:
+            - $ref: "#/components/schemas/BilirubinUmolL"
+            - type: "null"
+        treatment_state:
+          $ref: "#/components/schemas/TreatmentState"
+    RulePackSummary:
+      type: object
+      additionalProperties: false
+      required: [id, guideline_id, source_updated_on, status, content_sha256]
+      properties:
+        id:
+          $ref: "#/components/schemas/RulePackId"
+        guideline_id:
+          type: string
+          const: NICE-CG98
+        source_updated_on:
+          type: string
+          format: date
+        status:
+          type: string
+          enum: [draft, clinically_validated, active, retired]
+        content_sha256:
+          type: string
+          pattern: "^[a-f0-9]{64}$"
+    SourceReference:
+      type: object
+      additionalProperties: false
+      required: [product_id, reference, url]
+      properties:
+        product_id:
+          type: string
+          const: NICE-CG98
+        reference:
+          type: string
+          minLength: 1
+          maxLength: 32
+          example: "1.4.4"
+        url:
+          type: string
+          format: uri
+    ThresholdAssessment:
+      type: object
+      additionalProperties: false
+      required:
+        - measurement_id
+        - age_minutes
+        - phototherapy_threshold_umol_l
+        - phototherapy_relation
+        - phototherapy_distance_umol_l
+        - exchange_threshold_umol_l
+        - exchange_relation
+        - exchange_distance_umol_l
+        - treatment_decision_eligible
+      properties:
+        measurement_id:
+          type: string
+        age_minutes:
+          $ref: "#/components/schemas/AgeMinutes"
+        phototherapy_threshold_umol_l:
+          type: [number, "null"]
+          multipleOf: 0.1
+        phototherapy_relation:
+          $ref: "#/components/schemas/ThresholdRelation"
+        phototherapy_distance_umol_l:
+          type: [number, "null"]
+          multipleOf: 0.1
+        exchange_threshold_umol_l:
+          type: [number, "null"]
+          multipleOf: 0.1
+        exchange_relation:
+          $ref: "#/components/schemas/ThresholdRelation"
+        exchange_distance_umol_l:
+          type: [number, "null"]
+          multipleOf: 0.1
+        treatment_decision_eligible:
+          type: boolean
+    TrendAssessment:
+      type: object
+      additionalProperties: false
+      required:
+        - older_measurement_id
+        - newer_measurement_id
+        - interval_minutes
+        - rate_umol_l_per_hour
+        - direction
+        - reliable_for_rapid_rise
+        - rapid_rise_relation
+      properties:
+        older_measurement_id:
+          type: string
+        newer_measurement_id:
+          type: string
+        interval_minutes:
+          type: integer
+          minimum: 1
+        rate_umol_l_per_hour:
+          type: number
+          multipleOf: 0.1
+        direction:
+          type: string
+          enum: [rising, stable, falling]
+        reliable_for_rapid_rise:
+          type: boolean
+          description: True only when both measurements are serum and have distinct validated ages; no additional minimum interval is imposed.
+        rapid_rise_relation:
+          type: string
+          enum: [below, at, above, not_available]
+    Timeframe:
+      type: object
+      additionalProperties: false
+      required: [unit]
+      properties:
+        unit:
+          type: string
+          enum: [minutes, hours]
+        exact:
+          type: integer
+          minimum: 0
+        minimum:
+          type: integer
+          minimum: 0
+        maximum:
+          type: integer
+          minimum: 0
+    Recommendation:
+      type: object
+      additionalProperties: false
+      required:
+        - code
+        - priority
+        - category
+        - action
+        - rationale
+        - source_refs
+        - requires_serum_confirmation
+        - requires_clinician_confirmation
+      properties:
+        code:
+          type: string
+          pattern: "^[A-Z][A-Z0-9_]{2,63}$"
+        priority:
+          $ref: "#/components/schemas/Priority"
+        category:
+          type: string
+          enum:
+            - emergency
+            - measurement
+            - monitoring
+            - phototherapy
+            - exchange_transfusion
+            - underlying_disease
+            - prolonged_jaundice
+            - feeding_support
+            - information
+        action:
+          type: string
+          minLength: 1
+          maxLength: 1000
+        timeframe:
+          anyOf:
+            - $ref: "#/components/schemas/Timeframe"
+            - type: "null"
+        rationale:
+          type: string
+          minLength: 1
+          maxLength: 1000
+        source_refs:
+          type: array
+          minItems: 1
+          items:
+            $ref: "#/components/schemas/SourceReference"
+        requires_serum_confirmation:
+          type: boolean
+        requires_clinician_confirmation:
+          type: boolean
+          const: true
+    Warning:
+      type: object
+      additionalProperties: false
+      required: [code, category, message]
+      properties:
+        code:
+          type: string
+          pattern: "^[A-Z][A-Z0-9_]{2,63}$"
+        category:
+          type: string
+          enum: [clinical, scope, assay, source, system, legal]
+        message:
+          type: string
+          minLength: 1
+          maxLength: 1000
+    MissingInformation:
+      type: object
+      additionalProperties: false
+      required: [pointer, code, impact]
+      properties:
+        pointer:
+          type: string
+          pattern: "^/"
+        code:
+          type: string
+          pattern: "^[A-Z][A-Z0-9_]{2,63}$"
+        impact:
+          type: string
+          minLength: 1
+          maxLength: 500
+    DecisionReceipt:
+      type: object
+      additionalProperties: false
+      required: [schema_version, digest_sha256, canonicalisation, retained_by_server]
+      properties:
+        schema_version:
+          type: integer
+          const: 1
+        digest_sha256:
+          type: string
+          pattern: "^[a-f0-9]{64}$"
+        canonicalisation:
+          type: string
+          const: JCS-RFC8785
+        retained_by_server:
+          type: boolean
+          const: false
+    LegalNotices:
+      type: object
+      additionalProperties: false
+      required:
+        - intended_purpose
+        - intended_users
+        - uk_only
+        - professional_use_warning
+        - local_pathology_warning
+        - nice_attribution
+        - non_endorsement
+        - privacy_summary
+        - links
+      properties:
+        intended_purpose:
+          type: string
+        intended_users:
+          type: string
+        uk_only:
+          type: boolean
+          const: true
+        professional_use_warning:
+          type: string
+        local_pathology_warning:
+          type: string
+        nice_attribution:
+          type: string
+        non_endorsement:
+          type: string
+        privacy_summary:
+          type: string
+        links:
+          type: object
+          additionalProperties:
+            type: string
+            format: uri
+    NormalisedInputSummary:
+      type: object
+      additionalProperties: false
+      required:
+        - gestational_age_completed_weeks
+        - assessment_age_minutes
+        - measurement_count
+        - latest_measurement_id
+      properties:
+        gestational_age_completed_weeks:
+          $ref: "#/components/schemas/GestationalWeeks"
+        assessment_age_minutes:
+          $ref: "#/components/schemas/AgeMinutes"
+        measurement_count:
+          type: integer
+          minimum: 0
+          maximum: 64
+        latest_measurement_id:
+          type: [string, "null"]
+    EvaluationResponse:
+      type: object
+      additionalProperties: false
+      required:
+        - evaluation_id
+        - request_id
+        - evaluated_at
+        - mode
+        - api_version
+        - engine_version
+        - rule_pack
+        - normalised_input
+        - thresholds
+        - trend
+        - primary_action
+        - recommendations
+        - warnings
+        - missing_information
+        - suppressed_rules
+        - decision_receipt
+        - legal
+      properties:
+        evaluation_id:
+          type: string
+          format: uuid
+        request_id:
+          type: string
+          minLength: 1
+          maxLength: 64
+        evaluated_at:
+          type: string
+          format: date-time
+        mode:
+          type: string
+          enum: [demonstration, clinical]
+        api_version:
+          type: string
+        engine_version:
+          type: string
+        rule_pack:
+          $ref: "#/components/schemas/RulePackSummary"
+        normalised_input:
+          $ref: "#/components/schemas/NormalisedInputSummary"
+        thresholds:
+          type: array
+          items:
+            $ref: "#/components/schemas/ThresholdAssessment"
+        trend:
+          anyOf:
+            - $ref: "#/components/schemas/TrendAssessment"
+            - type: "null"
+        primary_action:
+          $ref: "#/components/schemas/Recommendation"
+        recommendations:
+          type: array
+          minItems: 1
+          items:
+            $ref: "#/components/schemas/Recommendation"
+        warnings:
+          type: array
+          items:
+            $ref: "#/components/schemas/Warning"
+        missing_information:
+          type: array
+          items:
+            $ref: "#/components/schemas/MissingInformation"
+        suppressed_rules:
+          type: array
+          uniqueItems: true
+          items:
+            type: string
+        decision_receipt:
+          $ref: "#/components/schemas/DecisionReceipt"
+        legal:
+          $ref: "#/components/schemas/LegalNotices"
+    RulePackMetadata:
+      type: object
+      additionalProperties: false
+      required: [id, guideline_id, source_updated_on, status, content_sha256, guideline_title, market, language, scope, sources, legal]
+      properties:
+        id:
+          $ref: "#/components/schemas/RulePackId"
+        guideline_id:
+          type: string
+          const: NICE-CG98
+        source_updated_on:
+          type: string
+          format: date
+        status:
+          type: string
+          enum: [draft, clinically_validated, active, retired]
+        content_sha256:
+          type: string
+          pattern: "^[a-f0-9]{64}$"
+        guideline_title:
+          type: string
+        market:
+          type: string
+          const: GB
+          description: ISO 3166-1 alpha-2 code for the United Kingdom; this is not a statement that Great Britain and Northern Ireland share one medical-device route.
+        language:
+          type: string
+          const: en-GB
+        scope:
+          type: object
+          additionalProperties: false
+          required: [gestation_weeks_minimum, gestation_weeks_maximum, assessment_age_minutes_maximum, treatment_age_minutes_maximum, bilirubin_unit]
+          properties:
+            gestation_weeks_minimum:
+              type: integer
+            gestation_weeks_maximum:
+              type: integer
+            assessment_age_minutes_maximum:
+              type: integer
+            treatment_age_minutes_maximum:
+              type: integer
+            bilirubin_unit:
+              type: string
+              const: umol/L
+        sources:
+          type: array
+          minItems: 1
+          items:
+            type: object
+            additionalProperties: false
+            required: [id, url, retrieved_on, sha256]
+            properties:
+              id:
+                type: string
+              url:
+                type: string
+                format: uri
+              retrieved_on:
+                type: string
+                format: date
+              sha256:
+                type: string
+                pattern: "^[a-f0-9]{64}$"
+        legal:
+          $ref: "#/components/schemas/LegalNotices"
+    ThresholdCurvePoint:
+      type: object
+      additionalProperties: false
+      required: [age_minutes, phototherapy_threshold_umol_l, exchange_threshold_umol_l]
+      properties:
+        age_minutes:
+          type: integer
+          minimum: 0
+          maximum: 20160
+        phototherapy_threshold_umol_l:
+          type: number
+          multipleOf: 0.1
+        exchange_threshold_umol_l:
+          type: number
+          multipleOf: 0.1
+    ThresholdCurve:
+      type: object
+      additionalProperties: false
+      required: [rule_pack, gestational_age_completed_weeks, resolution_minutes, display_only, points]
+      properties:
+        rule_pack:
+          $ref: "#/components/schemas/RulePackSummary"
+        gestational_age_completed_weeks:
+          $ref: "#/components/schemas/GestationalWeeks"
+        resolution_minutes:
+          type: integer
+          enum: [1, 5, 15, 30, 60]
+        display_only:
+          type: boolean
+          const: true
+        points:
+          type: array
+          minItems: 2
+          items:
+            $ref: "#/components/schemas/ThresholdCurvePoint"
+    FieldError:
+      type: object
+      additionalProperties: false
+      required: [pointer, code, message]
+      properties:
+        pointer:
+          type: string
+        code:
+          type: string
+        message:
+          type: string
+    Problem:
+      type: object
+      additionalProperties: false
+      required: [type, title, status, detail, instance, code]
+      properties:
+        type:
+          type: string
+          format: uri
+        title:
+          type: string
+        status:
+          type: integer
+          minimum: 400
+          maximum: 599
+        detail:
+          type: string
+        instance:
+          type: string
+          format: uri
+        code:
+          type: string
+          pattern: "^[A-Z][A-Z0-9_]{2,63}$"
+        errors:
+          type: array
+          items:
+            $ref: "#/components/schemas/FieldError"
+        active_rule_pack_id:
+          anyOf:
+            - $ref: "#/components/schemas/RulePackId"
+            - type: "null"
+    HealthStatus:
+      type: object
+      additionalProperties: false
+      required: [status]
+      properties:
+        status:
+          type: string
+          enum: [live, ready]

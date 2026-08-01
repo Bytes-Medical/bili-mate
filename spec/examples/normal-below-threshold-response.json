@@ -1,0 +1,106 @@
+{
+  "evaluation_id": "018f6f7e-3f64-7a6f-8d85-2c6e43fcae91",
+  "request_id": "example-normal-001",
+  "evaluated_at": "2026-08-01T10:00:00Z",
+  "mode": "demonstration",
+  "api_version": "1.0.0",
+  "engine_version": "1.0.0",
+  "rule_pack": {
+    "id": "nice-cg98-2023-10-31.1",
+    "guideline_id": "NICE-CG98",
+    "source_updated_on": "2023-10-31",
+    "status": "draft",
+    "content_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+  },
+  "normalised_input": {
+    "gestational_age_completed_weeks": 38,
+    "assessment_age_minutes": 2880,
+    "measurement_count": 1,
+    "latest_measurement_id": "m1"
+  },
+  "thresholds": [
+    {
+      "measurement_id": "m1",
+      "age_minutes": 2880,
+      "phototherapy_threshold_umol_l": 250.0,
+      "phototherapy_relation": "below",
+      "phototherapy_distance_umol_l": -70.0,
+      "exchange_threshold_umol_l": 450.0,
+      "exchange_relation": "below",
+      "exchange_distance_umol_l": -270.0,
+      "treatment_decision_eligible": true
+    }
+  ],
+  "trend": null,
+  "primary_action": {
+    "code": "NO_ROUTINE_REPEAT",
+    "priority": "routine",
+    "category": "monitoring",
+    "action": "Do not routinely repeat the bilirubin measurement solely on the basis of this result.",
+    "timeframe": null,
+    "rationale": "The baby is clinically well, at least 38 weeks' gestation, over 24 hours old and more than 50 micromol/L below the phototherapy threshold.",
+    "source_refs": [
+      {
+        "product_id": "NICE-CG98",
+        "reference": "1.4.2",
+        "url": "https://www.nice.org.uk/guidance/cg98/chapter/recommendations"
+      }
+    ],
+    "requires_serum_confirmation": false,
+    "requires_clinician_confirmation": true
+  },
+  "recommendations": [
+    {
+      "code": "NO_ROUTINE_REPEAT",
+      "priority": "routine",
+      "category": "monitoring",
+      "action": "Do not routinely repeat the bilirubin measurement solely on the basis of this result.",
+      "timeframe": null,
+      "rationale": "The baby is clinically well, at least 38 weeks' gestation, over 24 hours old and more than 50 micromol/L below the phototherapy threshold.",
+      "source_refs": [
+        {
+          "product_id": "NICE-CG98",
+          "reference": "1.4.2",
+          "url": "https://www.nice.org.uk/guidance/cg98/chapter/recommendations"
+        }
+      ],
+      "requires_serum_confirmation": false,
+      "requires_clinician_confirmation": true
+    }
+  ],
+  "warnings": [
+    {
+      "code": "DEMONSTRATION_ONLY",
+      "category": "system",
+      "message": "This example is not authorised for clinical use and must not influence patient care."
+    },
+    {
+      "code": "LOCAL_PATHOLOGY_ASSAY_WARNING",
+      "category": "assay",
+      "message": "Bilirubin results vary between assays. Interpret this result with advice from the local pathology laboratory."
+    }
+  ],
+  "missing_information": [],
+  "suppressed_rules": [],
+  "decision_receipt": {
+    "schema_version": 1,
+    "digest_sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+    "canonicalisation": "JCS-RFC8785",
+    "retained_by_server": false
+  },
+  "legal": {
+    "intended_purpose": "Professional clinical decision support for neonatal jaundice under NICE CG98.",
+    "intended_users": "Registered healthcare professionals in the United Kingdom.",
+    "uk_only": true,
+    "professional_use_warning": "This result requires review by a suitably trained healthcare professional and does not replace clinical judgement.",
+    "local_pathology_warning": "Consult the local pathology laboratory because bilirubin assay results may vary.",
+    "nice_attribution": "NICE CG98 content is used under the NICE UK Open Content Licence; see the legal endpoint for the full required attribution.",
+    "non_endorsement": "NICE has not endorsed Bili Mate.",
+    "privacy_summary": "The server does not retain assessment content after responding.",
+    "links": {
+      "guideline": "https://www.nice.org.uk/guidance/cg98",
+      "licence": "https://www.nice.org.uk/reusing-our-content/nice-uk-open-content-licence",
+      "privacy": "https://bili-mate.uk/privacy"
+    }
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "type": "https://api.bili-mate.uk/problems/rule-pack-conflict",
+  "title": "Rule pack cannot be evaluated",
+  "status": 409,
+  "detail": "The requested rule pack is not active. Refresh guideline metadata before evaluating.",
+  "instance": "urn:bili-mate:request:example-stale-001",
+  "code": "RULE_PACK_NOT_ACTIVE",
+  "active_rule_pack_id": "nice-cg98-2023-10-31.1"
+}

@@ -1,0 +1,366 @@
+schema_version: 1
+rule_pack:
+  id: nice-cg98-2023-10-31.1
+  guideline_id: NICE-CG98
+  guideline_title: Jaundice in newborn babies under 28 days
+  source_updated_on: 2023-10-31
+  specification_created_on: 2026-08-01
+  status: draft
+  market: GB
+  language: en-GB
+  unit: umol/L
+  authors: []
+  clinical_reviewers: []
+  clinical_safety_officer: null
+  supersedes: null
+  sources:
+    - id: cg98-recommendations
+      url: https://www.nice.org.uk/guidance/cg98/chapter/recommendations
+      retrieved_on: 2026-08-01
+      sha256: 959dd175da7b040eec5ec6034b7282e784d2cc7252a03065299ab3c3d83e705d
+      verification_status: downloaded_hash_recorded_pending_clinical_double_entry
+    - id: cg98-threshold-workbook
+      url: https://www.nice.org.uk/guidance/cg98/resources/treatment-threshold-graphs-excel-544300525
+      retrieved_on: 2026-08-01
+      sha256: 4c9e896c074b6d8b15daf18192951b5d82d3412a85a57438ba0112c76b5ec5a1
+      verification_status: downloaded_hash_recorded_pending_clinical_double_entry
+  scope:
+    gestational_age_completed_weeks:
+      minimum: 23
+      maximum: 42
+    assessment_age_minutes:
+      minimum: 0
+      maximum: 40319
+    treatment_threshold_age_minutes:
+      minimum: 0
+      maximum: 20160
+    bilirubin_umol_l:
+      minimum: 0
+      maximum: 1000
+      integer_only: true
+  arithmetic:
+    internal: rational
+    decision_rounding: none
+    display_decimal_places: 1
+    display_rounding: half_away_from_zero
+  thresholds:
+    preterm_23_to_37:
+      gestation_selector: actual_completed_weeks_at_birth
+      use_corrected_gestation: false
+      phototherapy:
+        birth_umol_l: 40
+        age_72h_formula: (10 * gestational_age_completed_weeks) - 100
+        interpolation:
+          from_age_minutes: 0
+          to_age_minutes: 4320
+          method: linear_exact
+        plateau:
+          from_age_minutes: 4320
+          through_age_minutes: 20160
+      exchange_transfusion:
+        birth_umol_l: 80
+        age_72h_formula: 10 * gestational_age_completed_weeks
+        interpolation:
+          from_age_minutes: 0
+          to_age_minutes: 4320
+          method: linear_exact
+        plateau:
+          from_age_minutes: 4320
+          through_age_minutes: 20160
+    term_38_plus:
+      gestation_bucket_minimum: 38
+      interpolation: linear_exact
+      phototherapy_points:
+        - [0, 100]
+        - [360, 125]
+        - [720, 150]
+        - [1080, 175]
+        - [1440, 200]
+        - [1800, 212]
+        - [2160, 225]
+        - [2520, 237]
+        - [2880, 250]
+        - [3240, 262]
+        - [3600, 275]
+        - [3960, 287]
+        - [4320, 300]
+        - [4680, 312]
+        - [5040, 325]
+        - [5400, 337]
+        - [5760, 350]
+        - [20160, 350]
+      exchange_transfusion_points:
+        - [0, 100]
+        - [360, 150]
+        - [720, 200]
+        - [1080, 250]
+        - [1440, 300]
+        - [1800, 350]
+        - [2160, 400]
+        - [2520, 450]
+        - [20160, 450]
+    comparison:
+      below: measurement < exact_threshold
+      at: measurement == exact_threshold
+      above: measurement > exact_threshold
+      equality_policy: urgent_clinical_review
+  constants:
+    first_day_minutes: 1440
+    serum_gestation_cutoff_weeks: 35
+    term_retest_gestation_weeks: 38
+    tcb_serum_confirmation_umol_l_strictly_greater_than: 250
+    rapid_rise_umol_l_per_hour_strictly_greater_than: 8.5
+    treatment_margin_umol_l: 50
+    intensified_exchange_proximity_age_minutes_minimum: 4320
+    kernicterus_bilirubin_umol_l_strictly_greater_than: 340
+    kernicterus_gestation_weeks_minimum: 37
+    prolonged_term_age_minutes_strictly_greater_than: 20160
+    prolonged_preterm_age_minutes_strictly_greater_than: 30240
+    prolonged_gestation_boundary_weeks: 37
+    conjugated_bilirubin_umol_l_strictly_greater_than: 25
+  priority_order:
+    - emergency
+    - immediate
+    - urgent
+    - treatment
+    - timed
+    - routine
+  rules:
+    - code: ACUTE_BILIRUBIN_ENCEPHALOPATHY_EMERGENCY
+      order: 10
+      priority: emergency
+      when: clinical_features.acute_bilirubin_encephalopathy == present
+      source_refs: [CG98-1.5.1, CG98-1.9.2]
+    - code: EXCHANGE_TRANSFUSION_ESCALATION
+      order: 20
+      priority: emergency
+      when: latest_serum.exchange_relation == above
+      source_refs: [CG98-1.9.2, CG98-1.9.3, CG98-1.9.4]
+    - code: AT_EXCHANGE_LINE_EMERGENCY_REVIEW
+      order: 30
+      priority: immediate
+      when: latest_measurement.exchange_relation == at
+      source_refs: [CG98-threshold-table, CG98-1.2.16]
+    - code: EXPERT_LIVER_ADVICE
+      order: 40
+      priority: immediate
+      when: conjugated_bilirubin_umol_l > 25
+      source_refs: [CG98-1.7.2]
+    - code: INCREASED_KERNICTERUS_RISK
+      order: 50
+      priority: immediate
+      when: latest_serum.value > 340 and gestation >= 37 or rapid_rise_confirmed or encephalopathy
+      source_refs: [CG98-1.5.1]
+    - code: EARLY_JAUNDICE_MEASURE_2H
+      order: 60
+      priority: urgent
+      when: suspected_or_obvious_jaundice and assessment_age_minutes <= 1440
+      source_refs: [CG98-1.2.10]
+    - code: EARLY_JAUNDICE_REPEAT_6H
+      order: 70
+      priority: urgent
+      when: early_jaundice and not (below_treatment_threshold and stable_or_falling)
+      source_refs: [CG98-1.2.11]
+    - code: EARLY_JAUNDICE_MEDICAL_REVIEW_6H
+      order: 80
+      priority: urgent
+      when: suspected_or_obvious_jaundice and assessment_age_minutes <= 1440
+      source_refs: [CG98-1.2.12]
+    - code: CONSIDER_INTENSIFIED_PHOTOTHERAPY
+      order: 90
+      priority: urgent
+      when: rapid_rise_confirmed or exchange_proximity_after_72h or phototherapy_nonresponse_confirmed
+      source_refs: [CG98-1.4.9]
+    - code: PHOTOTHERAPY_CHECK_OVERDUE
+      order: 95
+      priority: urgent
+      when: phototherapy_active and elapsed_since_start_minutes > 360 and no_qualifying_post_start_serum
+      source_refs: [CG98-1.4.4, CG98-1.4.9]
+    - code: PHOTOTHERAPY_RESPONSE_INCOMPLETE
+      order: 96
+      priority: urgent
+      when: phototherapy_active and not response_comparison_available
+      source_refs: [CG98-1.4.4, CG98-1.4.9]
+    - code: START_PHOTOTHERAPY
+      order: 100
+      priority: treatment
+      when: latest_serum.phototherapy_relation == above and latest_serum.exchange_relation != above
+      source_refs: [CG98-1.4.3, CG98-1.4.8]
+    - code: PHOTOTHERAPY_CHECK_4_6H
+      order: 110
+      priority: timed
+      when: treatment_started and elapsed_since_start_minutes <= 360 and no_qualifying_post_start_serum
+      source_refs: [CG98-1.4.4]
+    - code: PHOTOTHERAPY_CHECK_6_12H
+      order: 120
+      priority: timed
+      when: phototherapy_active and latest_serum.stable_or_falling
+      source_refs: [CG98-1.4.4]
+    - code: STOP_PHOTOTHERAPY
+      order: 130
+      priority: treatment
+      when: phototherapy_active and latest_serum.distance_below_phototherapy >= 50
+      source_refs: [CG98-1.4.5]
+    - code: REBOUND_CHECK_12_18H
+      order: 140
+      priority: timed
+      when: treatment_state.mode == post_phototherapy
+      source_refs: [CG98-1.4.6]
+    - code: JAUNDICE_MEASURE_6H
+      order: 150
+      priority: timed
+      when: suspected_or_obvious_jaundice and assessment_age_minutes > 1440
+      source_refs: [CG98-1.2.14]
+    - code: SERUM_REQUIRED_AGE
+      order: 160
+      priority: timed
+      when: assessment_age_minutes <= 1440
+      source_refs: [CG98-1.2.15]
+    - code: SERUM_REQUIRED_GESTATION
+      order: 170
+      priority: timed
+      when: gestational_age_completed_weeks < 35
+      source_refs: [CG98-1.2.15]
+    - code: SERUM_CONFIRM_TCB_250
+      order: 180
+      priority: timed
+      when: latest_measurement.method == transcutaneous and latest_measurement.value > 250
+      source_refs: [CG98-1.2.16]
+    - code: SERUM_CONFIRM_TREATMENT_LINE
+      order: 190
+      priority: timed
+      when: latest_measurement.method == transcutaneous and latest_measurement.at_or_above_treatment_line
+      source_refs: [CG98-1.2.16]
+    - code: RETEST_WITHIN_18H
+      order: 200
+      priority: timed
+      when: eligible_term_retest and distance_below_photo > 0 and distance_below_photo <= 50 and risk_factor_for_18h
+      source_refs: [CG98-1.4.1]
+    - code: RETEST_WITHIN_24H
+      order: 210
+      priority: timed
+      when: eligible_term_retest and distance_below_photo > 0 and distance_below_photo <= 50 and not risk_factor_for_18h
+      source_refs: [CG98-1.4.1]
+    - code: NO_ROUTINE_REPEAT
+      order: 220
+      priority: routine
+      when: eligible_term_retest and more_than_50_below_photo
+      source_refs: [CG98-1.4.2]
+    - code: ASSESS_UNDERLYING_DISEASE
+      order: 230
+      priority: routine
+      when: significant_hyperbilirubinaemia
+      source_refs: [CG98-1.6.1, CG98-1.6.2]
+    - code: PROLONGED_JAUNDICE_ASSESSMENT
+      order: 240
+      priority: urgent
+      when: prolonged_jaundice_criteria_met
+      source_refs: [CG98-1.7.1]
+    - code: IVIG_SPECIALIST_PATHWAY
+      order: 250
+      priority: urgent
+      when: haemolytic_disease and intensified_phototherapy and rapid_rise_confirmed
+      source_refs: [CG98-1.8.1]
+    - code: AT_TREATMENT_LINE_REVIEW
+      order: 260
+      priority: urgent
+      when: latest_measurement.phototherapy_relation == at and latest_measurement.exchange_relation != above
+      source_refs: [CG98-threshold-table, CG98-1.2.16, CG98-1.3.4]
+    - code: AT_CONJUGATED_BOUNDARY_REVIEW
+      order: 270
+      priority: urgent
+      when: conjugated_bilirubin_umol_l == 25
+      source_refs: [CG98-1.7.2]
+    - code: REDUCE_PHOTOTHERAPY_INTENSITY
+      order: 280
+      priority: treatment
+      when: intensified_phototherapy and latest_serum.distance_below_exchange >= 50
+      source_refs: [CG98-1.4.10]
+    - code: INCOMPLETE_DANGER_ASSESSMENT
+      order: 290
+      priority: urgent
+      when: any_required_danger_sign == unknown
+      source_refs: [CG98-1.2.3, CG98-1.5.1]
+      policy_refs: [BILI-MATE-safety-policy]
+    - code: AT_RAPID_RISE_BOUNDARY
+      order: 310
+      priority: timed
+      when: reliable_serum_rate_relation == at
+      source_refs: [CG98-1.4.9, CG98-1.5.1]
+    - code: SERUM_REQUIRED_SUBSEQUENT
+      order: 320
+      priority: timed
+      when: previous_result_at_or_above_treatment_line or treatment_state.mode != none
+      source_refs: [CG98-1.2.16]
+    - code: TCB_INITIAL_ALLOWED
+      order: 330
+      priority: routine
+      when: assessment_age_minutes > 1440 and gestational_age_completed_weeks >= 35 and no_serum_only_condition
+      source_refs: [CG98-1.2.16]
+    - code: NO_ROUTINE_BILIRUBIN
+      order: 340
+      priority: routine
+      when: suspected_or_obvious_jaundice == absent and visible_jaundice == absent
+      source_refs: [CG98-1.2.7]
+    - code: RETEST_INTERVAL_LOCAL_PROTOCOL
+      order: 350
+      priority: timed
+      when: below_phototherapy_threshold and not eligible_term_retest
+      source_refs: [CG98-1.4.1, CG98-1.4.2]
+      policy_refs: [BILI-MATE-scope-policy]
+    - code: DO_NOT_USE_SUNLIGHT
+      order: 360
+      priority: routine
+      when: phototherapy_information_displayed
+      source_refs: [CG98-1.4.7]
+    - code: ADDITIONAL_VISUAL_INSPECTION_48H
+      order: 370
+      priority: routine
+      when: increased_hyperbilirubinaemia_likelihood
+      source_refs: [CG98-1.2.1, CG98-1.2.9]
+    - code: VISUAL_ASSESSMENT_LIMITATIONS
+      order: 380
+      priority: routine
+      when: visual_assessment_guidance_displayed
+      source_refs: [CG98-1.2.4, CG98-1.2.5, CG98-1.2.6]
+    - code: BREASTFEEDING_SUPPORT
+      order: 390
+      priority: routine
+      when: exclusive_breastfeeding_intended or visible_jaundice
+      source_refs: [CG98-1.2.2, CG98-1.3.2, CG98-1.3.3]
+    - code: PARENT_CARER_INFORMATION
+      order: 400
+      priority: routine
+      when: assessment_completed
+      source_refs: [CG98-1.1.1, CG98-1.3.1]
+    - code: PHOTOTHERAPY_CARE_INFORMATION
+      order: 410
+      priority: routine
+      when: phototherapy_recommended_or_active
+      source_refs: [CG98-1.4.11, CG98-1.4.12, CG98-1.4.13, CG98-1.4.14, CG98-1.4.15, CG98-1.4.16, CG98-1.4.17, CG98-1.4.18, CG98-1.4.19]
+    - code: IVIG_INFORMATION
+      order: 420
+      priority: routine
+      when: ivig_pathway_displayed
+      source_refs: [CG98-1.8.2]
+    - code: EXCHANGE_TRANSFUSION_INFORMATION
+      order: 430
+      priority: routine
+      when: exchange_pathway_displayed
+      source_refs: [CG98-1.9.1]
+    - code: NO_ICETEROMETER
+      order: 440
+      priority: routine
+      when: measurement_method_guidance_displayed
+      source_refs: [CG98-1.2.17]
+    - code: DO_NOT_USE_PREDICTION_TESTS
+      order: 450
+      priority: routine
+      when: prediction_test_guidance_displayed
+      source_refs: [CG98-1.2.8]
+  universal_notices:
+    - PROFESSIONAL_USE_ONLY
+    - CLINICAL_JUDGEMENT_REQUIRED
+    - LOCAL_PATHOLOGY_ASSAY_WARNING
+    - NICE_ATTRIBUTION_AND_NON_ENDORSEMENT
+    - SOURCE_VERSION
