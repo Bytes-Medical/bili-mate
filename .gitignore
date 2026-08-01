@@ -6,3 +6,4 @@ node_modules/
 web/.next/
 web/out/
 release-evidence/
+infrastructure/.terraform/

@@ -108,8 +108,11 @@ fn treatment_state(assessment_age: u32) -> impl Strategy<Value = TreatmentState>
                 exchange_completed_age_minutes: None,
             }
         }),
-        (0..=assessment_age).prop_flat_map(move |stop| {
-            (0..stop.max(1), Just(stop)).prop_map(|(start, stop)| TreatmentState {
+        // Stop must be strictly later than start (DATA-013), so stop is at
+        // least 1 and start strictly below it. `assessment_age` is >= 1 in
+        // every generated case.
+        (1..=assessment_age).prop_flat_map(move |stop| {
+            (0..stop, Just(stop)).prop_map(|(start, stop)| TreatmentState {
                 mode: TreatmentMode::PostPhototherapy,
                 started_age_minutes: Some(AgeMinutes::new(start).unwrap()),
                 stopped_age_minutes: Some(AgeMinutes::new(stop).unwrap()),

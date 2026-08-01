@@ -187,7 +187,7 @@ resource "aws_ecs_task_definition" "api" {
 
     readonlyRootFilesystem = true
     linuxParameters = {
-      capabilities = { drop = ["ALL"] }
+      capabilities       = { drop = ["ALL"] }
       initProcessEnabled = false
     }
     mountPoints = [{ sourceVolume = "tmp", containerPath = "/tmp", readOnly = false }]
