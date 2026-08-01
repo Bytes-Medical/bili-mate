@@ -1,0 +1,622 @@
+/* Bili Mate monochrome design system (ADR-010).
+   Identity: a clinical instrument. Pure black and white plus a small grey
+   ramp; IBM Plex Sans for structure, IBM Plex Mono for every clinical value
+   so measurements read like a laboratory readout. Clinical state is never
+   communicated by colour alone (PRD-032) — in this system there is no
+   colour to lean on, so weight, inversion, rules and iconography carry it. */
+
+:root {
+  --ink: #000000;
+  --ink-strong: #1a1a1a;
+  --ink-mid: #4d4d4d;
+  --ink-soft: #6b6b6b;
+  --rule: #d9d9d9;
+  --rule-strong: #8c8c8c;
+  --panel: #f4f4f4;
+  --paper: #ffffff;
+  --font-sans: var(--plex-sans), "Helvetica Neue", Arial, sans-serif;
+  --font-mono: var(--plex-mono), "SFMono-Regular", Consolas, monospace;
+  --measure: 42rem;
+  --shell: 72rem;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink-strong);
+  font-family: var(--font-sans);
+  font-size: 1rem;
+  line-height: 1.55;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ---- Typography -------------------------------------------------------- */
+
+h1,
+h2,
+h3 {
+  color: var(--ink);
+  line-height: 1.15;
+  letter-spacing: -0.01em;
+  margin: 0 0 0.5rem;
+}
+
+h1 {
+  font-size: clamp(1.75rem, 4vw, 2.5rem);
+  font-weight: 700;
+}
+
+h2 {
+  font-size: 1.375rem;
+  font-weight: 600;
+}
+
+h3 {
+  font-size: 1.0625rem;
+  font-weight: 600;
+}
+
+p {
+  margin: 0 0 1rem;
+  max-width: var(--measure);
+}
+
+a {
+  color: var(--ink);
+  text-underline-offset: 0.15em;
+}
+
+.eyebrow {
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-mid);
+  margin: 0 0 0.375rem;
+}
+
+.mono,
+.value {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+.value {
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.muted {
+  color: var(--ink-soft);
+}
+
+.small {
+  font-size: 0.875rem;
+}
+
+/* ---- Focus and interaction -------------------------------------------- */
+
+:focus-visible {
+  outline: 3px solid var(--ink);
+  outline-offset: 2px;
+}
+
+.skip-link {
+  position: absolute;
+  left: -999px;
+  top: 0;
+  background: var(--ink);
+  color: var(--paper);
+  padding: 0.5rem 1rem;
+  z-index: 100;
+}
+
+.skip-link:focus {
+  left: 0;
+}
+
+/* ---- Shell ------------------------------------------------------------- */
+
+.shell {
+  max-width: var(--shell);
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+.site-header {
+  border-bottom: 3px solid var(--ink);
+}
+
+.site-header .shell {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.25rem 1.25rem;
+  padding-top: 1rem;
+  padding-bottom: 0.75rem;
+}
+
+.wordmark {
+  font-size: 1.25rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  text-decoration: none;
+}
+
+.wordmark-sub {
+  font-size: 0.8125rem;
+  color: var(--ink-mid);
+}
+
+.site-nav {
+  margin-left: auto;
+  display: flex;
+  gap: 1rem;
+  font-size: 0.875rem;
+}
+
+/* Professional-use status stays visible on every page (WEB-003). */
+.professional-banner {
+  background: var(--panel);
+  border-bottom: 1px solid var(--rule);
+  font-size: 0.8125rem;
+  color: var(--ink-strong);
+}
+
+.professional-banner .shell {
+  padding-top: 0.4rem;
+  padding-bottom: 0.4rem;
+}
+
+main {
+  padding: 2rem 0 4rem;
+}
+
+.site-footer {
+  border-top: 3px solid var(--ink);
+  padding: 1.5rem 0 2.5rem;
+  font-size: 0.8125rem;
+  color: var(--ink-mid);
+}
+
+.site-footer p {
+  max-width: none;
+}
+
+/* ---- Panels, rules, notices ------------------------------------------- */
+
+.panel {
+  border: 1px solid var(--rule-strong);
+  padding: 1rem 1.25rem;
+  margin: 0 0 1.25rem;
+  background: var(--paper);
+}
+
+.panel-filled {
+  background: var(--panel);
+  border-color: var(--rule);
+}
+
+.notice {
+  border-left: 4px solid var(--ink);
+  padding: 0.625rem 1rem;
+  margin: 0 0 1rem;
+  background: var(--panel);
+  font-size: 0.9375rem;
+}
+
+.rule-above {
+  border-top: 1px solid var(--rule);
+  padding-top: 1rem;
+  margin-top: 1rem;
+}
+
+/* ---- Buttons and inputs ------------------------------------------------ */
+
+button,
+input,
+select {
+  font: inherit;
+}
+
+.btn {
+  display: inline-block;
+  border: 2px solid var(--ink);
+  background: var(--ink);
+  color: var(--paper);
+  font-weight: 600;
+  padding: 0.625rem 1.5rem;
+  min-height: 44px;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.btn:hover {
+  background: var(--ink-strong);
+}
+
+.btn-secondary {
+  background: var(--paper);
+  color: var(--ink);
+}
+
+.btn-secondary:hover {
+  background: var(--panel);
+}
+
+.btn:disabled {
+  border-color: var(--rule-strong);
+  background: var(--panel);
+  color: var(--ink-soft);
+  cursor: not-allowed;
+}
+
+.field {
+  margin: 0 0 1.25rem;
+}
+
+.field > label,
+.field-label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+}
+
+.field-hint {
+  font-size: 0.875rem;
+  color: var(--ink-mid);
+  margin: 0 0 0.375rem;
+  max-width: var(--measure);
+}
+
+.field-error {
+  font-weight: 600;
+  color: var(--ink);
+  border-left: 4px solid var(--ink);
+  padding-left: 0.5rem;
+  margin: 0.375rem 0 0;
+  font-size: 0.9375rem;
+}
+
+input[type="text"],
+input[type="number"],
+input[type="date"],
+input[type="time"],
+select {
+  border: 1px solid var(--rule-strong);
+  background: var(--paper);
+  color: var(--ink-strong);
+  padding: 0.5rem 0.625rem;
+  min-height: 44px;
+  max-width: 100%;
+}
+
+input[type="checkbox"],
+input[type="radio"] {
+  width: 1.375rem;
+  height: 1.375rem;
+  accent-color: var(--ink);
+}
+
+.input-suffix {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.input-suffix .suffix {
+  font-family: var(--font-mono);
+  font-weight: 600;
+}
+
+.timestamp-inputs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+/* Tri-state: three explicit options, no default (WEB-009). */
+.tri-field {
+  border: 1px solid var(--rule);
+  border-left: 4px solid var(--rule-strong);
+  padding: 0.75rem 1rem;
+  margin: 0 0 0.75rem;
+}
+
+.tri-field legend {
+  font-weight: 600;
+  padding: 0;
+}
+
+.tri-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.375rem 1.5rem;
+  margin-top: 0.5rem;
+}
+
+.tri-options label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 44px;
+  cursor: pointer;
+}
+
+/* ---- Stepper ----------------------------------------------------------- */
+
+.assessment-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 2rem;
+}
+
+@media (min-width: 60rem) {
+  .assessment-grid {
+    grid-template-columns: minmax(0, 1fr) 20rem;
+  }
+}
+
+.step-list {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 1rem;
+  padding: 0;
+  margin: 0 0 1.5rem;
+  font-size: 0.8125rem;
+  border-bottom: 1px solid var(--rule);
+  padding-bottom: 0.75rem;
+}
+
+.step-list li {
+  color: var(--ink-soft);
+}
+
+.step-list li[aria-current="step"] {
+  color: var(--ink);
+  font-weight: 700;
+}
+
+.step-number {
+  font-family: var(--font-mono);
+  margin-right: 0.25rem;
+}
+
+.summary-rail {
+  border: 1px solid var(--rule-strong);
+  padding: 1rem 1.25rem;
+  align-self: start;
+  position: sticky;
+  top: 1rem;
+  font-size: 0.875rem;
+}
+
+.summary-rail dl {
+  margin: 0;
+}
+
+.summary-rail dt {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-mid);
+  margin-top: 0.75rem;
+}
+
+.summary-rail dd {
+  margin: 0.125rem 0 0;
+}
+
+/* ---- Result: a formal clinical document -------------------------------- */
+
+.result-document {
+  border: 2px solid var(--ink);
+}
+
+.result-section {
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid var(--rule);
+}
+
+.result-section:last-child {
+  border-bottom: none;
+}
+
+.priority-banner {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem 1.5rem;
+  border-bottom: 2px solid var(--ink);
+  font-weight: 700;
+}
+
+.priority-banner .priority-label {
+  font-size: 0.8125rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  font-family: var(--font-mono);
+}
+
+/* Emergency and immediate invert: unmistakable in monochrome (TEST-025). */
+.priority-emergency,
+.priority-immediate {
+  background: var(--ink);
+  color: var(--paper);
+}
+
+.priority-emergency a,
+.priority-immediate a {
+  color: var(--paper);
+}
+
+.priority-urgent {
+  background: var(--panel);
+  border-left: 8px solid var(--ink);
+}
+
+.priority-treatment,
+.priority-timed,
+.priority-routine {
+  background: var(--paper);
+}
+
+.warning-icon {
+  flex: none;
+  width: 1.5rem;
+  height: 1.5rem;
+}
+
+.recommendation {
+  border: 1px solid var(--rule);
+  border-left: 4px solid var(--ink-mid);
+  padding: 0.75rem 1rem;
+  margin: 0 0 0.75rem;
+}
+
+.recommendation .rec-code {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--ink-mid);
+}
+
+.recommendation .rec-action {
+  margin: 0.25rem 0;
+  font-weight: 500;
+  max-width: none;
+}
+
+.data-table {
+  border-collapse: collapse;
+  width: 100%;
+  font-size: 0.875rem;
+}
+
+.data-table caption {
+  text-align: left;
+  font-weight: 600;
+  padding-bottom: 0.5rem;
+}
+
+.data-table th,
+.data-table td {
+  border: 1px solid var(--rule);
+  padding: 0.4rem 0.625rem;
+  text-align: left;
+  vertical-align: top;
+}
+
+.data-table th {
+  background: var(--panel);
+  font-weight: 600;
+}
+
+.data-table td.numeric,
+.data-table th.numeric {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.table-scroll {
+  overflow-x: auto;
+}
+
+/* Chart: instrument chart-paper. Lines carry meaning by dash pattern and
+   markers by fill, never by colour (spec 06 chart rules). */
+.chart-figure {
+  margin: 0 0 1rem;
+}
+
+.chart-figure > svg {
+  width: 100%;
+  height: auto;
+  border: 1px solid var(--rule-strong);
+  background: var(--paper);
+}
+
+.chart-legend .swatch {
+  flex: none;
+}
+
+.chart-legend li {
+  display: inline-flex;
+  align-items: center;
+}
+
+.chart-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.375rem 1.5rem;
+  font-size: 0.8125rem;
+  margin-top: 0.5rem;
+  list-style: none;
+  padding: 0;
+}
+
+.chart-legend .swatch {
+  display: inline-block;
+  vertical-align: middle;
+  margin-right: 0.5rem;
+}
+
+.receipt-foot {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--ink-mid);
+  word-break: break-all;
+}
+
+/* ---- Failure states ---------------------------------------------------- */
+
+.failure-panel {
+  border: 3px solid var(--ink);
+  padding: 1.5rem;
+}
+
+.failure-panel h2 {
+  display: flex;
+  gap: 0.625rem;
+  align-items: center;
+}
+
+/* ---- Print: the non-identifying receipt (WEB-022) ---------------------- */
+
+@media print {
+  .site-header,
+  .professional-banner,
+  .site-footer,
+  .step-list,
+  .summary-rail,
+  .no-print {
+    display: none !important;
+  }
+  body {
+    font-size: 11pt;
+  }
+  .result-document {
+    border-width: 1pt;
+  }
+  a {
+    text-decoration: none;
+  }
+}

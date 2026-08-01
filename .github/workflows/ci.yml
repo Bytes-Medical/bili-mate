@@ -33,6 +33,40 @@ jobs:
       - run: cargo clippy --workspace --all-targets -- -D warnings
       - run: cargo test --workspace
 
+  web:
+    name: Reference web client
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: 1.90.0
+      - uses: Swatinem/rust-cache@v2
+      - name: Install dependencies
+        run: npm ci
+        working-directory: web
+      - name: Verify the committed API schema matches the contract
+        run: |
+          npm run generate:api
+          git diff --exit-code lib/api/schema.d.ts
+        working-directory: web
+      - name: Build static export with CSP hashes
+        run: npm run build
+        working-directory: web
+        env:
+          NEXT_PUBLIC_API_BASE_URL: http://localhost:18099
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium firefox webkit
+        working-directory: web
+      - name: Browser end-to-end tests (three engines, TEST-023)
+        run: npx playwright test
+        working-directory: web
+
   clients:
     name: Generated API clients
     runs-on: ubuntu-latest

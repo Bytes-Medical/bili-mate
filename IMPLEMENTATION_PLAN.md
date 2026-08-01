@@ -19,7 +19,22 @@ Date: 2026-08-01
 > generation (TS/Swift/Kotlin) runs as a CI job with a TypeScript consumer
 > fixture; **M3 follow-ups:** verify the client-gen job on the first CI run,
 > add Swift/Kotlin consumer fixtures, add exhaustive-enum handling to the TS
-> fixture. Next engineering milestone: M4 (Next.js reference web client).
+> fixture.
+> M4: `web/` Next.js (App Router) static-export reference client per
+> ADR-009/010 — monochrome IBM Plex design system, professional-use gate in
+> sessionStorage, six routes, seven-step assessment with Luxon IANA/DST
+> elapsed-minute derivation (timestamps never sent), result presented in the
+> spec 06 order with inverted emergency banners and live regions, accessible
+> SVG threshold chart with a tabular twin, fail-closed failure states, typed
+> client generated from `spec/openapi.yaml` via openapi-typescript, and a
+> post-build CSP hash step (no `unsafe-inline` scripts). Playwright suites
+> (gate, flow vs the real API, DST derivation, failure states, storage,
+> chart semantics, axe accessibility) run on Chromium/Firefox/WebKit; a CI
+> `web` job builds, checks schema drift and runs the suites.
+> **M4 follow-ups:** manual keyboard/screen-reader/200 %-zoom review
+> (TEST-024's manual half), print-content and monochrome-at-zoom automation,
+> remaining spec 09 web matrix breadth. Next engineering milestone: M5
+> (hardening, performance, container, Terraform).
 
 This plan turns the normative specification in [`spec/`](spec/README.md) into a sequenced engineering programme. It follows the delivery stages in [11-delivery-and-rollout](spec/11-delivery-and-rollout.md) and the ordering principle stated there: **clinical behaviour is validated before interface polish can conceal errors**. The clinical core is built and proven first, the API second, the web client third, and hardening/operations last before the governance-heavy validation stages.
 

@@ -78,5 +78,11 @@ fn build_cors(allowed_origins: &[String]) -> CorsLayer {
             header::CONTENT_TYPE,
             header::HeaderName::from_static("x-request-id"),
         ])
+        // Browser clients must be able to read the request ID on every
+        // response (API-003) and Retry-After on 429/503 (API-006).
+        .expose_headers([
+            header::RETRY_AFTER,
+            header::HeaderName::from_static("x-request-id"),
+        ])
         .max_age(std::time::Duration::from_secs(3600))
 }
