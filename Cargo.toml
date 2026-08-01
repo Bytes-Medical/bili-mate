@@ -5,6 +5,7 @@ members = [
     "crates/guideline-data",
     "apps/api",
     "apps/cli",
+    "apps/loadtest",
 ]
 
 [workspace.package]

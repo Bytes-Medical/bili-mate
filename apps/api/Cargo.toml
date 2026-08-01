@@ -27,5 +27,6 @@ uuid = { version = "1.24.0", features = ["v7"] }
 [dev-dependencies]
 http-body-util = "0.1.4"
 jsonschema = "0.49.2"
+proptest.workspace = true
 serde_yaml.workspace = true
 tower = { version = "0.5.3", features = ["util"] }

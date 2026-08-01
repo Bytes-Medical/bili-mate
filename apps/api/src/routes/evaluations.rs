@@ -147,7 +147,13 @@ pub async fn evaluate_assessment(
         return Problem::validation_failed(field_errors).into_response_with_request_id(&rid);
     }
 
-    // 4. Resolve the exact requested rule pack (CLIN-006, API-013).
+    // 4. Resolve the exact requested rule pack (CLIN-006, API-013). An
+    // unready service serves no clinical result at all: a draft pack must
+    // never answer in clinical mode (CLIN-003), even for a request that
+    // arrives while orchestration is removing the instance (OPS-003).
+    if !state.ready() {
+        return Problem::engine_unavailable().into_response_with_request_id(&rid);
+    }
     let Some(pack) = state.pack() else {
         return Problem::engine_unavailable().into_response_with_request_id(&rid);
     };

@@ -33,8 +33,27 @@ Date: 2026-08-01
 > `web` job builds, checks schema drift and runs the suites.
 > **M4 follow-ups:** manual keyboard/screen-reader/200 %-zoom review
 > (TEST-024's manual half), print-content and monochrome-at-zoom automation,
-> remaining spec 09 web matrix breadth. Next engineering milestone: M5
-> (hardening, performance, container, Terraform).
+> remaining spec 09 web matrix breadth.
+> M5 (engineering scope): full-stack sentinel tests spawning the real binary
+> (TEST-028 app layer, SIGTERM drain, binary-level readiness gates — which
+> surfaced and fixed a CLIN-003 gap: an unready clinical-mode instance now
+> refuses evaluations), JSON-boundary fuzz suite, `bili-load` open-loop
+> generator + `scripts/load-test.sh` (local run: 6,000 req at 100 rps,
+> 0 errors, p95 2.9 ms / p99 3.6 ms vs 100/250 ms objectives — PRD-028 met
+> with headroom; full 15-min profile is a staging action), hardened
+> distroless `Dockerfile` (non-root 65532, digest deploys, notices),
+> `infrastructure/` Terraform reference topology (no-egress private
+> subnets + VPC endpoints, CloudFront UK geo, WAF UK/size/rate/managed
+> rules, HTTPS-only ALB with readiness health checks, ×2 AZ Fargate with
+> read-only rootfs, spec 10 alarm table) + `RUNBOOK.md` (OPS-014 + canary
+> procedure), and a tag-triggered release pipeline (SBOM, trivy gate,
+> keyless cosign signing, release manifest, canary approval environment).
+> **M5 follow-ups / not local-verifiable:** docker image build and
+> `terraform validate` run in CI only (no daemon/binary locally); full
+> 15-minute load + burst profile, AZ-loss and staging-cert resilience
+> drills, independent penetration test, DAST, and the formative usability
+> review are staging/human actions (Stage 2 exit gates). Next: M6 (Stage 3
+> clinical-validation support tooling).
 
 This plan turns the normative specification in [`spec/`](spec/README.md) into a sequenced engineering programme. It follows the delivery stages in [11-delivery-and-rollout](spec/11-delivery-and-rollout.md) and the ordering principle stated there: **clinical behaviour is validated before interface polish can conceal errors**. The clinical core is built and proven first, the API second, the web client third, and hardening/operations last before the governance-heavy validation stages.
 

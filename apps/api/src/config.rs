@@ -46,14 +46,28 @@ impl Config {
         if allowed_origins.iter().any(|o| o == "*") {
             return Err("wildcard CORS origin is prohibited (SEC-004)".into());
         }
+        // Rate limits are deployment configuration (spec 05); the defaults
+        // are the normative API-005 values. Raising them is a controlled
+        // test-environment action (spec 09 load profile), never a clinical
+        // deployment default.
+        let parse_limit = |name: &str, default: u32| -> Result<u32, String> {
+            match std::env::var(name) {
+                Err(_) => Ok(default),
+                Ok(value) => value
+                    .parse::<u32>()
+                    .ok()
+                    .filter(|v| *v > 0)
+                    .ok_or_else(|| format!("{name} must be a positive integer")),
+            }
+        };
         Ok(Self {
             mode,
             bind_address: std::env::var("BILI_MATE_BIND")
                 .unwrap_or_else(|_| "127.0.0.1:8080".into()),
             allowed_origins,
             release_authorisation_ref: std::env::var("BILI_MATE_RELEASE_AUTHORISATION").ok(),
-            rate_limit_per_minute: 60,
-            rate_limit_burst: 20,
+            rate_limit_per_minute: parse_limit("BILI_MATE_RATE_LIMIT_PER_MINUTE", 60)?,
+            rate_limit_burst: parse_limit("BILI_MATE_RATE_LIMIT_BURST", 20)?,
         })
     }
 

@@ -1,0 +1,8 @@
+target/
+web/node_modules/
+web/.next/
+web/out/
+web/playwright-report/
+web/test-results/
+clients/generated/
+.git/

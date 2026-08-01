@@ -134,6 +134,7 @@ dependencies = [
  "hex",
  "http-body-util",
  "jsonschema",
+ "proptest",
  "serde",
  "serde_jcs",
  "serde_json",
@@ -157,6 +158,18 @@ dependencies = [
  "guideline-data",
  "serde",
  "serde_json",
+]
+
+[[package]]
+name = "bili-mate-loadtest"
+version = "0.1.0"
+dependencies = [
+ "bytes",
+ "http",
+ "http-body-util",
+ "hyper-util",
+ "serde_json",
+ "tokio",
 ]
 
 [[package]]
