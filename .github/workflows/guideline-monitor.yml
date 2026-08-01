@@ -1,0 +1,50 @@
+# Weekly CG98 source surveillance (spec 08). Notify-only: a detected change
+# opens or updates a clinical-review issue; production rules never change
+# from here.
+
+name: Guideline monitor
+
+on:
+  schedule:
+    - cron: "0 6 * * 1" # Mondays 06:00 UTC
+  workflow_dispatch:
+
+permissions:
+  issues: write
+  contents: read
+
+jobs:
+  monitor:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check CG98 sources
+        id: check
+        run: |
+          set +e
+          OUTPUT="$(bash scripts/guideline-monitor.sh 2>&1)"
+          STATUS=$?
+          echo "$OUTPUT"
+          {
+            echo "output<<EOF"
+            echo "$OUTPUT"
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
+          exit $STATUS
+      - name: Raise the clinical-review alert
+        if: failure()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          TITLE="Guideline monitor: NICE CG98 source change detected"
+          BODY="The weekly monitor found a possible CG98 change. Clinical review is required within one working day (spec 08). This is notify-only; production rules are unchanged.
+
+          \`\`\`
+          ${{ steps.check.outputs.output }}
+          \`\`\`"
+          EXISTING=$(gh issue list --state open --search "$TITLE in:title" --json number --jq '.[0].number // empty')
+          if [ -n "$EXISTING" ]; then
+            gh issue comment "$EXISTING" --body "$BODY"
+          else
+            gh issue create --title "$TITLE" --body "$BODY" --label clinical-review
+          fi

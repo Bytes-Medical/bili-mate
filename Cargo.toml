@@ -6,6 +6,7 @@ members = [
     "apps/api",
     "apps/cli",
     "apps/loadtest",
+    "apps/scenarios",
 ]
 
 [workspace.package]

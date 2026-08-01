@@ -52,8 +52,25 @@ Date: 2026-08-01
 > `terraform validate` run in CI only (no daemon/binary locally); full
 > 15-minute load + burst profile, AZ-loss and staging-cert resilience
 > drills, independent penetration test, DAST, and the formative usability
-> review are staging/human actions (Stage 2 exit gates). Next: M6 (Stage 3
-> clinical-validation support tooling).
+> review are staging/human actions (Stage 2 exit gates).
+> M6 (Stage 3 engineering support): 68-scenario clinical validation set
+> (`validation/cg98-scenarios.yaml`) covering every spec 09 distribution
+> category, run by the `bili-scenarios` harness as a CI gate with a
+> signed-review Markdown export carrying the scenario-set SHA-256 (authoring
+> it surfaced and fixed a scoping refinement: the 18/24-hour repeat rules
+> and local-protocol fallback now apply only before treatment, per the spec
+> section title); weekly notify-only CG98 source monitor (script + cron
+> workflow raising a clinical-review issue); `pack-tool`
+> verify/diff/promote enforcing the pack lifecycle (two distinct reviewers
+> for clinically_validated, CSO for active) with post-edit engine
+> re-verification; `scripts/traceability-check.rb` in CI (all 46 rule codes
+> test-exercised; every requirement ID cited from implementation exists in
+> the spec; per-prefix coverage report); `scripts/release-evidence.sh`
+> hashed evidence bundles. **Stage 3 remains governance-gated:** the two
+> independent clinical approvals of the scenario set and rule pack,
+> regulatory qualification, content rights, penetration test and DTAC pack
+> are human actions the tooling now supports. Next: M7 (shadow/advisory
+> pilot operations) after Stage 3 sign-offs.
 
 This plan turns the normative specification in [`spec/`](spec/README.md) into a sequenced engineering programme. It follows the delivery stages in [11-delivery-and-rollout](spec/11-delivery-and-rollout.md) and the ordering principle stated there: **clinical behaviour is validated before interface polish can conceal errors**. The clinical core is built and proven first, the API second, the web client third, and hardening/operations last before the governance-heavy validation stages.
 

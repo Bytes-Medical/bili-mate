@@ -1,0 +1,901 @@
+# Clinical scenario validation set (spec 09: at least 60 scenarios across
+# every distribution category, each recording inputs, expected actions and
+# NICE references). Two independent clinical reviewers sign the exported
+# review document; the export carries this file's SHA-256 so an approval
+# covers exactly one content state.
+#
+# Baseline input unless overridden: jaundice suspected and visible,
+# clinically well, every other feature absent, metabolic screening
+# completed, both risk factors absent, no treatment, timezone-free elapsed
+# minutes. `expect.active` lists rules that must fire (the primary may fire
+# alongside them); `expect.inactive` rules that must not.
+
+scenarios:
+  # ---- Preterm thresholds (23-37 weeks) ---------------------------------
+  - id: S001
+    title: 23 weeks at birth, serum one below the phototherapy line
+    category: preterm-thresholds
+    refs: ["threshold-graphs", "1.2.10", "1.2.11", "1.2.15"]
+    input:
+      gestation: 23
+      age: 0
+      measurements: [{ age: 0, value: 39, method: serum }]
+    expect:
+      primary: EARLY_JAUNDICE_REPEAT_6H
+      active: [EARLY_JAUNDICE_MEDICAL_REVIEW_6H, SERUM_REQUIRED_AGE, SERUM_REQUIRED_GESTATION, ADDITIONAL_VISUAL_INSPECTION_48H]
+      photo_relation: below
+      exchange_relation: below
+  - id: S002
+    title: 23 weeks at birth, serum exactly at the phototherapy line (40)
+    category: preterm-thresholds
+    refs: ["threshold-graphs", "1.2.11"]
+    input:
+      gestation: 23
+      age: 0
+      measurements: [{ age: 0, value: 40, method: serum }]
+    expect:
+      primary: EARLY_JAUNDICE_REPEAT_6H
+      active: [AT_TREATMENT_LINE_REVIEW]
+      photo_relation: at
+      exchange_relation: below
+  - id: S003
+    title: 23 weeks at birth, serum one above the phototherapy line
+    category: preterm-thresholds
+    refs: ["threshold-graphs", "1.4.3"]
+    input:
+      gestation: 23
+      age: 0
+      measurements: [{ age: 0, value: 41, method: serum }]
+    expect:
+      primary: EARLY_JAUNDICE_REPEAT_6H
+      active: [START_PHOTOTHERAPY, ASSESS_UNDERLYING_DISEASE, PHOTOTHERAPY_CARE_INFORMATION, DO_NOT_USE_SUNLIGHT, SERUM_REQUIRED_SUBSEQUENT]
+      photo_relation: above
+      exchange_relation: below
+  - id: S004
+    title: 28 weeks at 72 hours, serum exactly at the plateau line (180)
+    category: preterm-thresholds
+    refs: ["threshold-graphs", "1.2.16"]
+    input:
+      gestation: 28
+      age: 4320
+      measurements: [{ age: 4320, value: 180, method: serum }]
+    expect:
+      primary: AT_TREATMENT_LINE_REVIEW
+      active: [SERUM_REQUIRED_GESTATION]
+      inactive: [SERUM_CONFIRM_TREATMENT_LINE, TCB_INITIAL_ALLOWED]
+      photo_relation: at
+      exchange_relation: below
+  - id: S005
+    title: 30 weeks at 72 hours, serum one above the plateau line
+    category: preterm-thresholds
+    refs: ["threshold-graphs", "1.4.3"]
+    input:
+      gestation: 30
+      age: 4320
+      measurements: [{ age: 4320, value: 201, method: serum }]
+    expect:
+      primary: START_PHOTOTHERAPY
+      active: [ASSESS_UNDERLYING_DISEASE, SERUM_REQUIRED_SUBSEQUENT, SERUM_REQUIRED_GESTATION]
+      photo_relation: above
+      exchange_relation: below
+  - id: S006
+    title: 30 weeks at 14 days, serum just below the plateau line
+    category: preterm-thresholds
+    description: The preterm baby is outside the 18/24-hour repeat population, so no NICE interval exists; serum remains required below 35 weeks.
+    refs: ["1.2.15", "1.4.1", "1.4.2"]
+    input:
+      gestation: 30
+      age: 20160
+      measurements: [{ age: 20160, value: 199, method: serum }]
+    expect:
+      primary: SERUM_REQUIRED_GESTATION
+      active: [RETEST_INTERVAL_LOCAL_PROTOCOL]
+      inactive: [RETEST_WITHIN_24H, NO_ROUTINE_REPEAT]
+      photo_relation: below
+  - id: S007
+    title: 34 weeks requires serum; transcutaneous is not permitted
+    category: preterm-thresholds
+    refs: ["1.2.15"]
+    input:
+      gestation: 34
+      age: 2880
+      measurements: [{ age: 2880, value: 100, method: transcutaneous }]
+    expect:
+      primary: SERUM_REQUIRED_GESTATION
+      active: [RETEST_INTERVAL_LOCAL_PROTOCOL]
+      inactive: [TCB_INITIAL_ALLOWED]
+  - id: S008
+    title: 37 weeks below the line uses the local-protocol interval, not the term repeat rules
+    category: preterm-thresholds
+    refs: ["1.4.1", "1.4.2"]
+    input:
+      gestation: 37
+      age: 2880
+      measurements: [{ age: 2880, value: 180, method: serum }]
+    expect:
+      primary: RETEST_INTERVAL_LOCAL_PROTOCOL
+      inactive: [RETEST_WITHIN_24H, RETEST_WITHIN_18H, NO_ROUTINE_REPEAT, SERUM_REQUIRED_GESTATION]
+      photo_relation: below
+
+  # ---- Term thresholds (38+ weeks) --------------------------------------
+  - id: S009
+    title: 38 weeks at 48 hours, serum one below the line (249 vs 250)
+    category: term-thresholds
+    refs: ["threshold-graphs", "1.4.1"]
+    input:
+      gestation: 38
+      age: 2880
+      measurements: [{ age: 2880, value: 249, method: serum }]
+    expect:
+      primary: RETEST_WITHIN_24H
+      photo_relation: below
+      exchange_relation: below
+  - id: S010
+    title: 38 weeks at 48 hours, serum exactly at the line (250)
+    category: term-thresholds
+    refs: ["threshold-graphs", "1.2.16", "1.3.4"]
+    input:
+      gestation: 38
+      age: 2880
+      measurements: [{ age: 2880, value: 250, method: serum }]
+    expect:
+      primary: AT_TREATMENT_LINE_REVIEW
+      inactive: [RETEST_WITHIN_24H, START_PHOTOTHERAPY]
+      photo_relation: at
+  - id: S011
+    title: 38 weeks at 48 hours, serum one above the line (251)
+    category: term-thresholds
+    refs: ["threshold-graphs", "1.4.3", "1.4.8"]
+    input:
+      gestation: 38
+      age: 2880
+      measurements: [{ age: 2880, value: 251, method: serum }]
+    expect:
+      primary: START_PHOTOTHERAPY
+      active: [ASSESS_UNDERLYING_DISEASE, PHOTOTHERAPY_CARE_INFORMATION, DO_NOT_USE_SUNLIGHT, SERUM_REQUIRED_SUBSEQUENT]
+      photo_relation: above
+      exchange_relation: below
+  - id: S012
+    title: 42 weeks at 96 hours, serum exactly at the phototherapy plateau (350)
+    category: term-thresholds
+    description: 350 is strictly over the 340 kernicterus threshold at 37 or more weeks, so the risk recognition outranks the at-line review, which remains visible.
+    refs: ["threshold-graphs", "1.5.1"]
+    input:
+      gestation: 42
+      age: 5760
+      measurements: [{ age: 5760, value: 350, method: serum }]
+    expect:
+      primary: INCREASED_KERNICTERUS_RISK
+      active: [AT_TREATMENT_LINE_REVIEW]
+      photo_relation: at
+      exchange_relation: below
+  - id: S013
+    title: 38 weeks at 12 hours, serum exactly at the exchange line (200)
+    category: term-thresholds
+    refs: ["threshold-graphs", "1.2.16"]
+    input:
+      gestation: 38
+      age: 720
+      measurements: [{ age: 720, value: 200, method: serum }]
+    expect:
+      primary: AT_EXCHANGE_LINE_EMERGENCY_REVIEW
+      active: [EARLY_JAUNDICE_MEDICAL_REVIEW_6H, EXCHANGE_TRANSFUSION_INFORMATION]
+      photo_relation: above
+      exchange_relation: at
+  - id: S014
+    title: 38 weeks at 12 hours, serum one above the exchange line (201)
+    category: term-thresholds
+    refs: ["threshold-graphs", "1.9.2", "1.9.3", "1.9.4"]
+    input:
+      gestation: 38
+      age: 720
+      measurements: [{ age: 720, value: 201, method: serum }]
+    expect:
+      primary: EXCHANGE_TRANSFUSION_ESCALATION
+      active: [ASSESS_UNDERLYING_DISEASE, EXCHANGE_TRANSFUSION_INFORMATION, EARLY_JAUNDICE_MEDICAL_REVIEW_6H]
+      inactive: [INCREASED_KERNICTERUS_RISK]
+      exchange_relation: above
+
+  # ---- Recognition and the first-day boundary ---------------------------
+  - id: S015
+    title: Suspected jaundice at 23 h 59 min with no result yet
+    category: recognition
+    refs: ["1.2.10", "1.2.12", "1.2.15"]
+    input:
+      gestation: 38
+      age: 1439
+    expect:
+      primary: EARLY_JAUNDICE_MEASURE_2H
+      active: [EARLY_JAUNDICE_MEDICAL_REVIEW_6H, SERUM_REQUIRED_AGE]
+  - id: S016
+    title: Suspected jaundice at exactly 24 hours (1,440 min) stays on the first-day pathway
+    category: recognition
+    description: Product interpretation CLIN-051 - exact age 1,440 minutes belongs to the conservative first-day pathway.
+    refs: ["1.2.10", "1.2.12"]
+    input:
+      gestation: 38
+      age: 1440
+    expect:
+      primary: EARLY_JAUNDICE_MEASURE_2H
+      inactive: [JAUNDICE_MEASURE_6H]
+  - id: S017
+    title: Suspected jaundice at 1,441 minutes moves to the over-24-hours pathway
+    category: recognition
+    refs: ["1.2.14", "1.2.16"]
+    input:
+      gestation: 38
+      age: 1441
+    expect:
+      primary: JAUNDICE_MEASURE_6H
+      active: [TCB_INITIAL_ALLOWED]
+      inactive: [EARLY_JAUNDICE_MEASURE_2H, EARLY_JAUNDICE_MEDICAL_REVIEW_6H, SERUM_REQUIRED_AGE]
+  - id: S018
+    title: A first-day transcutaneous result does not satisfy the serum requirement
+    category: recognition
+    refs: ["1.2.10", "1.2.15"]
+    input:
+      gestation: 38
+      age: 1000
+      measurements: [{ age: 900, value: 90, method: transcutaneous }]
+    expect:
+      primary: EARLY_JAUNDICE_MEASURE_2H
+      active: [SERUM_REQUIRED_AGE]
+  - id: S019
+    title: No suspected or visible jaundice - do not routinely measure
+    category: recognition
+    refs: ["1.2.7"]
+    input:
+      gestation: 38
+      age: 2880
+      jaundice: false
+    expect:
+      primary: NO_ROUTINE_BILIRUBIN
+      inactive: [JAUNDICE_MEASURE_6H, TCB_INITIAL_ALLOWED]
+  - id: S020
+    title: Early jaundice below the line and falling stands the repeat rule down
+    category: recognition
+    refs: ["1.2.11", "1.2.12"]
+    input:
+      gestation: 38
+      age: 1200
+      measurements:
+        - { age: 600, value: 95, method: serum }
+        - { age: 1140, value: 90, method: serum }
+    expect:
+      primary: EARLY_JAUNDICE_MEDICAL_REVIEW_6H
+      inactive: [EARLY_JAUNDICE_REPEAT_6H]
+      photo_relation: below
+
+  # ---- Measurement-method selection -------------------------------------
+  - id: S021
+    title: 36 weeks over 24 hours may use a transcutaneous bilirubinometer
+    category: measurement-method
+    refs: ["1.2.16"]
+    input:
+      gestation: 36
+      age: 2880
+      measurements: [{ age: 2880, value: 100, method: transcutaneous }]
+    expect:
+      primary: RETEST_INTERVAL_LOCAL_PROTOCOL
+      active: [TCB_INITIAL_ALLOWED]
+      inactive: [SERUM_REQUIRED_GESTATION]
+  - id: S022
+    title: Transcutaneous 251 requires serum confirmation (strictly over 250)
+    category: measurement-method
+    refs: ["1.2.16"]
+    input:
+      gestation: 38
+      age: 4320
+      measurements: [{ age: 4320, value: 251, method: transcutaneous }]
+    expect:
+      primary: SERUM_CONFIRM_TCB_250
+      active: [RETEST_WITHIN_24H]
+      photo_relation: below
+  - id: S023
+    title: Transcutaneous exactly at the treatment line requires serum confirmation and review
+    category: measurement-method
+    refs: ["1.2.16", "1.3.4"]
+    input:
+      gestation: 38
+      age: 4320
+      measurements: [{ age: 4320, value: 300, method: transcutaneous }]
+    expect:
+      primary: AT_TREATMENT_LINE_REVIEW
+      active: [SERUM_CONFIRM_TREATMENT_LINE, SERUM_CONFIRM_TCB_250, SERUM_REQUIRED_SUBSEQUENT]
+      inactive: [START_PHOTOTHERAPY]
+      photo_relation: at
+  - id: S024
+    title: Once a result has reached the line, all later measurements must be serum
+    category: measurement-method
+    refs: ["1.2.16"]
+    input:
+      gestation: 38
+      age: 4320
+      measurements:
+        - { age: 2880, value: 250, method: serum }
+        - { age: 4320, value: 240, method: serum }
+    expect:
+      primary: SERUM_REQUIRED_SUBSEQUENT
+      inactive: [TCB_INITIAL_ALLOWED]
+  - id: S025
+    title: During phototherapy the response cannot be assessed without a post-start serum result
+    category: measurement-method
+    refs: ["1.2.16", "1.4.4", "1.4.9"]
+    input:
+      gestation: 38
+      age: 3000
+      measurements: [{ age: 2880, value: 280, method: serum }]
+      treatment: { mode: phototherapy, started: 2900 }
+    expect:
+      primary: PHOTOTHERAPY_RESPONSE_INCOMPLETE
+      active: [PHOTOTHERAPY_CHECK_4_6H, SERUM_REQUIRED_SUBSEQUENT]
+      missing: ["/measurements"]
+  - id: S026
+    title: 35 weeks is the lowest gestation permitted to use transcutaneous measurement
+    category: measurement-method
+    refs: ["1.2.15", "1.2.16"]
+    input:
+      gestation: 35
+      age: 2880
+      measurements: [{ age: 2880, value: 100, method: transcutaneous }]
+    expect:
+      primary: RETEST_INTERVAL_LOCAL_PROTOCOL
+      active: [TCB_INITIAL_ALLOWED]
+      inactive: [SERUM_REQUIRED_GESTATION]
+
+  # ---- Below-line monitoring before phototherapy ------------------------
+  - id: S027
+    title: Well term baby 49 below the line with no risk factor repeats within 24 hours
+    category: below-line-monitoring
+    refs: ["1.4.1"]
+    input:
+      gestation: 38
+      age: 4320
+      measurements: [{ age: 4320, value: 251, method: serum }]
+    expect:
+      primary: RETEST_WITHIN_24H
+      inactive: [RETEST_WITHIN_18H, NO_ROUTINE_REPEAT]
+  - id: S028
+    title: A previous sibling who needed phototherapy shortens the repeat to 18 hours
+    category: below-line-monitoring
+    refs: ["1.4.1"]
+    input:
+      gestation: 38
+      age: 4320
+      risks: { previous_sibling_required_phototherapy: present }
+      measurements: [{ age: 4320, value: 251, method: serum }]
+    expect:
+      primary: RETEST_WITHIN_18H
+      inactive: [RETEST_WITHIN_24H]
+  - id: S029
+    title: Intended exclusive breastfeeding shortens the repeat to 18 hours with feeding support
+    category: below-line-monitoring
+    refs: ["1.4.1", "1.3.2", "1.3.3"]
+    input:
+      gestation: 38
+      age: 4320
+      risks: { exclusive_breastfeeding_intended: present }
+      measurements: [{ age: 4320, value: 251, method: serum }]
+    expect:
+      primary: RETEST_WITHIN_18H
+      active: [BREASTFEEDING_SUPPORT]
+  - id: S030
+    title: Exactly 50 below the line stays in the within-50 repeat branch
+    category: below-line-monitoring
+    refs: ["1.4.1"]
+    input:
+      gestation: 38
+      age: 4320
+      measurements: [{ age: 4320, value: 250, method: serum }]
+    expect:
+      primary: RETEST_WITHIN_24H
+      inactive: [NO_ROUTINE_REPEAT]
+  - id: S031
+    title: 51 below the line needs no routine repeat
+    category: below-line-monitoring
+    refs: ["1.4.2"]
+    input:
+      gestation: 38
+      age: 4320
+      measurements: [{ age: 4320, value: 249, method: serum }]
+    expect:
+      primary: NO_ROUTINE_REPEAT
+      inactive: [RETEST_WITHIN_24H]
+  - id: S032
+    title: Unknown clinical state blocks the repeat-interval rules and reassurance
+    category: below-line-monitoring
+    refs: ["1.4.1", "1.4.2"]
+    input:
+      gestation: 38
+      age: 4320
+      features: { clinically_well: unknown }
+      measurements: [{ age: 4320, value: 251, method: serum }]
+    expect:
+      primary: INCOMPLETE_DANGER_ASSESSMENT
+      active: [RETEST_INTERVAL_LOCAL_PROTOCOL]
+      inactive: [RETEST_WITHIN_24H, NO_ROUTINE_REPEAT]
+      missing: ["/clinical_features/clinically_well"]
+
+  # ---- Serial trends ----------------------------------------------------
+  - id: S033
+    title: A serum rise of 8.0 per hour is not rapid
+    category: trends
+    refs: ["1.4.9", "1.5.1"]
+    input:
+      gestation: 38
+      age: 2000
+      measurements:
+        - { age: 1800, value: 100, method: serum }
+        - { age: 1920, value: 116, method: serum }
+    expect:
+      primary: NO_ROUTINE_REPEAT
+      inactive: [INCREASED_KERNICTERUS_RISK, AT_RAPID_RISE_BOUNDARY, CONSIDER_INTENSIFIED_PHOTOTHERAPY]
+  - id: S034
+    title: A serum rise of exactly 8.5 per hour is the boundary, not a rapid rise
+    category: trends
+    refs: ["1.4.9", "1.5.1"]
+    input:
+      gestation: 38
+      age: 2000
+      measurements:
+        - { age: 1800, value: 100, method: serum }
+        - { age: 1920, value: 117, method: serum }
+    expect:
+      primary: AT_RAPID_RISE_BOUNDARY
+      inactive: [INCREASED_KERNICTERUS_RISK, CONSIDER_INTENSIFIED_PHOTOTHERAPY]
+  - id: S035
+    title: A serum rise strictly over 8.5 per hour is rapid and raises kernicterus risk
+    category: trends
+    refs: ["1.4.9", "1.5.1"]
+    input:
+      gestation: 38
+      age: 2000
+      measurements:
+        - { age: 1800, value: 100, method: serum }
+        - { age: 1920, value: 118, method: serum }
+    expect:
+      primary: INCREASED_KERNICTERUS_RISK
+      active: [CONSIDER_INTENSIFIED_PHOTOTHERAPY]
+      suppressed: [NO_ROUTINE_REPEAT]
+  - id: S036
+    title: A transcutaneous result cannot confirm the rapid-rise rule
+    category: trends
+    refs: ["1.2.16", "1.4.9"]
+    input:
+      gestation: 38
+      age: 2000
+      measurements:
+        - { age: 1800, value: 100, method: serum }
+        - { age: 1920, value: 118, method: transcutaneous }
+    expect:
+      primary: NO_ROUTINE_REPEAT
+      inactive: [INCREASED_KERNICTERUS_RISK, AT_RAPID_RISE_BOUNDARY]
+  - id: S037
+    title: Equal consecutive serum values are stable
+    category: trends
+    refs: ["1.2.11"]
+    input:
+      gestation: 38
+      age: 3000
+      measurements:
+        - { age: 2000, value: 150, method: serum }
+        - { age: 2900, value: 150, method: serum }
+    expect:
+      primary: NO_ROUTINE_REPEAT
+      inactive: [AT_RAPID_RISE_BOUNDARY]
+  - id: S038
+    title: A falling serum trend within 50 of the line still repeats within 24 hours
+    category: trends
+    refs: ["1.4.1"]
+    input:
+      gestation: 38
+      age: 4320
+      measurements:
+        - { age: 3000, value: 280, method: serum }
+        - { age: 4200, value: 260, method: serum }
+    expect:
+      primary: RETEST_WITHIN_24H
+      photo_relation: below
+
+  # ---- Phototherapy pathway ---------------------------------------------
+  - id: S039
+    title: Stable or falling during phototherapy repeats every 6 to 12 hours
+    category: phototherapy
+    refs: ["1.4.4"]
+    input:
+      gestation: 38
+      age: 3400
+      measurements:
+        - { age: 2990, value: 300, method: serum }
+        - { age: 3300, value: 290, method: serum }
+      treatment: { mode: phototherapy, started: 3000 }
+    expect:
+      primary: PHOTOTHERAPY_CHECK_6_12H
+      inactive: [PHOTOTHERAPY_CHECK_OVERDUE, PHOTOTHERAPY_RESPONSE_INCOMPLETE, CONSIDER_INTENSIFIED_PHOTOTHERAPY, RETEST_WITHIN_24H]
+  - id: S040
+    title: More than six hours with no post-start serum result is overdue monitoring
+    category: phototherapy
+    refs: ["1.4.4", "1.4.9"]
+    input:
+      gestation: 38
+      age: 3400
+      measurements: [{ age: 2990, value: 280, method: serum }]
+      treatment: { mode: phototherapy, started: 3000 }
+    expect:
+      primary: PHOTOTHERAPY_CHECK_OVERDUE
+      active: [PHOTOTHERAPY_RESPONSE_INCOMPLETE]
+      inactive: [PHOTOTHERAPY_CHECK_4_6H]
+      missing: ["/measurements"]
+  - id: S041
+    title: Failure to respond is recognised before six hours - do not wait
+    category: phototherapy
+    refs: ["1.4.4", "1.4.9"]
+    input:
+      gestation: 38
+      age: 3120
+      measurements:
+        - { age: 2990, value: 280, method: serum }
+        - { age: 3120, value: 285, method: serum }
+      treatment: { mode: phototherapy, started: 3000 }
+    expect:
+      primary: CONSIDER_INTENSIFIED_PHOTOTHERAPY
+      inactive: [PHOTOTHERAPY_CHECK_OVERDUE]
+  - id: S042
+    title: An unchanged value at exactly six hours is a failure to fall
+    category: phototherapy
+    refs: ["1.4.4", "1.4.9"]
+    input:
+      gestation: 38
+      age: 3360
+      measurements:
+        - { age: 2990, value: 280, method: serum }
+        - { age: 3360, value: 280, method: serum }
+      treatment: { mode: phototherapy, started: 3000 }
+    expect:
+      primary: CONSIDER_INTENSIFIED_PHOTOTHERAPY
+      inactive: [PHOTOTHERAPY_CHECK_OVERDUE]
+  - id: S043
+    title: A late post-start result still activates non-response and flags the missed check
+    category: phototherapy
+    refs: ["1.4.4", "1.4.9"]
+    input:
+      gestation: 38
+      age: 3500
+      measurements:
+        - { age: 2990, value: 280, method: serum }
+        - { age: 3450, value: 285, method: serum }
+      treatment: { mode: phototherapy, started: 3000 }
+    expect:
+      primary: CONSIDER_INTENSIFIED_PHOTOTHERAPY
+      active: [PHOTOTHERAPY_CHECK_OVERDUE]
+  - id: S044
+    title: Serum at least 50 below the line during phototherapy stops treatment
+    category: phototherapy
+    refs: ["1.4.5"]
+    input:
+      gestation: 38
+      age: 4320
+      measurements:
+        - { age: 4000, value: 320, method: serum }
+        - { age: 4320, value: 250, method: serum }
+      treatment: { mode: phototherapy, started: 4010 }
+    expect:
+      primary: STOP_PHOTOTHERAPY
+      suppressed: [PHOTOTHERAPY_CHECK_6_12H]
+  - id: S045
+    title: 49 below the line during phototherapy continues with 6-12-hour checks
+    category: phototherapy
+    refs: ["1.4.4", "1.4.5"]
+    input:
+      gestation: 38
+      age: 4320
+      measurements:
+        - { age: 4000, value: 320, method: serum }
+        - { age: 4320, value: 251, method: serum }
+      treatment: { mode: phototherapy, started: 4010 }
+    expect:
+      primary: PHOTOTHERAPY_CHECK_6_12H
+      inactive: [STOP_PHOTOTHERAPY, RETEST_WITHIN_24H, RETEST_INTERVAL_LOCAL_PROTOCOL]
+  - id: S046
+    title: After stopping phototherapy the rebound check owns the repeat interval
+    category: phototherapy
+    refs: ["1.4.6"]
+    input:
+      gestation: 38
+      age: 4400
+      measurements: [{ age: 4300, value: 200, method: serum }]
+      treatment: { mode: post_phototherapy, started: 3000, stopped: 4000 }
+    expect:
+      primary: REBOUND_CHECK_12_18H
+      active: [SERUM_REQUIRED_SUBSEQUENT]
+      inactive: [NO_ROUTINE_REPEAT, RETEST_INTERVAL_LOCAL_PROTOCOL]
+  - id: S047
+    title: After an exchange transfusion a high serum result raises kernicterus risk
+    category: phototherapy
+    refs: ["1.5.1", "1.9.4"]
+    input:
+      gestation: 38
+      age: 2880
+      measurements: [{ age: 2870, value: 400, method: serum }]
+      treatment: { mode: post_exchange, exchange_completed: 2800 }
+    expect:
+      primary: INCREASED_KERNICTERUS_RISK
+      active: [START_PHOTOTHERAPY, SERUM_REQUIRED_SUBSEQUENT]
+      inactive: [EXCHANGE_TRANSFUSION_ESCALATION]
+      exchange_relation: below
+
+  # ---- Intensified phototherapy -----------------------------------------
+  - id: S048
+    title: At 72 hours, exactly 50 below the exchange line triggers intensification
+    category: intensified-phototherapy
+    description: At the exact boundary both the proximity trigger and the step-down rule apply; the escalation is primary and the de-escalation is suppressed.
+    refs: ["1.4.9", "1.4.10"]
+    input:
+      gestation: 36
+      age: 4320
+      measurements:
+        - { age: 4000, value: 320, method: serum }
+        - { age: 4320, value: 310, method: serum }
+      treatment: { mode: intensified_phototherapy, started: 4010 }
+    expect:
+      primary: CONSIDER_INTENSIFIED_PHOTOTHERAPY
+      suppressed: [REDUCE_PHOTOTHERAPY_INTENSITY]
+  - id: S049
+    title: One minute before 72 hours the proximity trigger does not apply
+    category: intensified-phototherapy
+    refs: ["1.4.9"]
+    input:
+      gestation: 36
+      age: 4319
+      measurements:
+        - { age: 4000, value: 330, method: serum }
+        - { age: 4319, value: 320, method: serum }
+      treatment: { mode: intensified_phototherapy, started: 4010 }
+    expect:
+      primary: PHOTOTHERAPY_CHECK_6_12H
+      inactive: [CONSIDER_INTENSIFIED_PHOTOTHERAPY]
+  - id: S050
+    title: 51 below the exchange line during intensified phototherapy steps down
+    category: intensified-phototherapy
+    refs: ["1.4.10"]
+    input:
+      gestation: 36
+      age: 4320
+      measurements:
+        - { age: 4000, value: 320, method: serum }
+        - { age: 4320, value: 309, method: serum }
+      treatment: { mode: intensified_phototherapy, started: 4010 }
+    expect:
+      primary: REDUCE_PHOTOTHERAPY_INTENSITY
+      inactive: [CONSIDER_INTENSIFIED_PHOTOTHERAPY]
+  - id: S051
+    title: Rhesus disease with intensified phototherapy and a rapid rise reaches the IVIG pathway
+    category: haemolysis-ivig
+    refs: ["1.8.1", "1.8.2", "1.5.1"]
+    input:
+      gestation: 38
+      age: 4200
+      features: { rhesus_haemolytic_disease: present }
+      measurements:
+        - { age: 4000, value: 300, method: serum }
+        - { age: 4120, value: 330, method: serum }
+      treatment: { mode: intensified_phototherapy, started: 3900 }
+    expect:
+      primary: INCREASED_KERNICTERUS_RISK
+      active: [IVIG_SPECIALIST_PATHWAY, IVIG_INFORMATION, CONSIDER_INTENSIFIED_PHOTOTHERAPY]
+
+  # ---- Exchange transfusion and encephalopathy --------------------------
+  - id: S052
+    title: Acute bilirubin encephalopathy is an emergency below every numeric line
+    category: exchange-and-encephalopathy
+    refs: ["1.5.1", "1.9.2"]
+    input:
+      gestation: 38
+      age: 2880
+      features: { acute_bilirubin_encephalopathy: present }
+      measurements: [{ age: 2880, value: 150, method: serum }]
+    expect:
+      primary: ACUTE_BILIRUBIN_ENCEPHALOPATHY_EMERGENCY
+      active: [EXCHANGE_TRANSFUSION_ESCALATION, INCREASED_KERNICTERUS_RISK, EXCHANGE_TRANSFUSION_INFORMATION]
+      suppressed: [NO_ROUTINE_REPEAT]
+      photo_relation: below
+  - id: S053
+    title: Serum 341 at 37 or more weeks raises kernicterus risk (strictly over 340)
+    category: exchange-and-encephalopathy
+    refs: ["1.5.1"]
+    input:
+      gestation: 38
+      age: 5760
+      measurements: [{ age: 5760, value: 341, method: serum }]
+    expect:
+      primary: INCREASED_KERNICTERUS_RISK
+      suppressed: [RETEST_WITHIN_24H]
+      photo_relation: below
+  - id: S054
+    title: The 340 kernicterus threshold does not apply below 37 weeks
+    category: exchange-and-encephalopathy
+    description: At 36 weeks, 341 is within 50 of the exchange plateau (360) after 72 hours, so intensified phototherapy is considered; the 340 rule itself stays inactive below 37 weeks.
+    refs: ["1.5.1", "1.4.9"]
+    input:
+      gestation: 36
+      age: 10000
+      measurements: [{ age: 10000, value: 341, method: serum }]
+    expect:
+      primary: CONSIDER_INTENSIFIED_PHOTOTHERAPY
+      active: [START_PHOTOTHERAPY]
+      inactive: [INCREASED_KERNICTERUS_RISK]
+      photo_relation: above
+      exchange_relation: below
+  - id: S055
+    title: Above the exchange line during intensified phototherapy with unknown danger signs
+    category: exchange-and-encephalopathy
+    refs: ["1.9.2", "1.9.3", "1.9.4"]
+    input:
+      gestation: 38
+      age: 2880
+      features: { clinically_well: absent, infection_suspected: unknown }
+      measurements: [{ age: 2880, value: 470, method: serum }]
+      treatment: { mode: intensified_phototherapy, started: 2700 }
+    expect:
+      primary: EXCHANGE_TRANSFUSION_ESCALATION
+      active: [INCREASED_KERNICTERUS_RISK, INCOMPLETE_DANGER_ASSESSMENT, EXCHANGE_TRANSFUSION_INFORMATION]
+      missing: ["/clinical_features/infection_suspected"]
+      exchange_relation: above
+  - id: S056
+    title: A measurement taken at exactly 24 hours can sit exactly on the exchange line
+    category: exchange-and-encephalopathy
+    refs: ["threshold-graphs", "1.2.16"]
+    input:
+      gestation: 38
+      age: 1441
+      measurements: [{ age: 1440, value: 300, method: serum }]
+    expect:
+      primary: AT_EXCHANGE_LINE_EMERGENCY_REVIEW
+      inactive: [EXCHANGE_TRANSFUSION_ESCALATION]
+      exchange_relation: at
+
+  # ---- Underlying disease -----------------------------------------------
+  - id: S057
+    title: Significant hyperbilirubinaemia triggers the underlying-disease assessment
+    category: underlying-disease
+    refs: ["1.6.1", "1.6.2"]
+    input:
+      gestation: 38
+      age: 2880
+      features: { infection_suspected: present }
+      measurements: [{ age: 2880, value: 270, method: serum }]
+    expect:
+      primary: START_PHOTOTHERAPY
+      active: [ASSESS_UNDERLYING_DISEASE]
+  - id: S058
+    title: A transcutaneous value above the line is not yet significant hyperbilirubinaemia
+    category: underlying-disease
+    refs: ["1.2.16", "1.6.1"]
+    input:
+      gestation: 38
+      age: 2880
+      measurements: [{ age: 2880, value: 270, method: transcutaneous }]
+    expect:
+      primary: SERUM_CONFIRM_TCB_250
+      active: [SERUM_CONFIRM_TREATMENT_LINE]
+      inactive: [ASSESS_UNDERLYING_DISEASE, START_PHOTOTHERAPY]
+
+  # ---- Prolonged jaundice ------------------------------------------------
+  - id: S059
+    title: At exactly 14 days the prolonged-jaundice rule is not yet active
+    category: prolonged-jaundice
+    refs: ["1.7.1", "1.4.1"]
+    input:
+      gestation: 38
+      age: 20160
+      measurements: [{ age: 20160, value: 300, method: serum }]
+    expect:
+      primary: RETEST_WITHIN_24H
+      inactive: [PROLONGED_JAUNDICE_ASSESSMENT]
+      photo_relation: below
+  - id: S060
+    title: One minute beyond 14 days starts the prolonged-jaundice assessment
+    category: prolonged-jaundice
+    refs: ["1.7.1"]
+    input:
+      gestation: 38
+      age: 20161
+    expect:
+      primary: PROLONGED_JAUNDICE_ASSESSMENT
+      missing: ["/conjugated_bilirubin_umol_l"]
+  - id: S061
+    title: Below 37 weeks the boundary is 21 days - not yet active at exactly 21 days
+    category: prolonged-jaundice
+    refs: ["1.7.1"]
+    input:
+      gestation: 36
+      age: 30240
+    expect:
+      primary: JAUNDICE_MEASURE_6H
+      inactive: [PROLONGED_JAUNDICE_ASSESSMENT]
+  - id: S062
+    title: One minute beyond 21 days starts the preterm prolonged-jaundice assessment
+    category: prolonged-jaundice
+    refs: ["1.7.1"]
+    input:
+      gestation: 36
+      age: 30241
+    expect:
+      primary: PROLONGED_JAUNDICE_ASSESSMENT
+  - id: S063
+    title: Conjugated bilirubin of exactly 25 is the boundary, not the liver referral
+    category: prolonged-jaundice
+    refs: ["1.7.2"]
+    input:
+      gestation: 38
+      age: 21601
+      conjugated: 25
+    expect:
+      primary: PROLONGED_JAUNDICE_ASSESSMENT
+      active: [AT_CONJUGATED_BOUNDARY_REVIEW]
+      inactive: [EXPERT_LIVER_ADVICE]
+  - id: S064
+    title: Conjugated bilirubin over 25 with dark urine needs expert liver advice
+    category: prolonged-jaundice
+    refs: ["1.7.2"]
+    input:
+      gestation: 38
+      age: 21601
+      features: { dark_urine_stains_nappy: present }
+      conjugated: 30
+    expect:
+      primary: EXPERT_LIVER_ADVICE
+      active: [PROLONGED_JAUNDICE_ASSESSMENT]
+      inactive: [AT_CONJUGATED_BOUNDARY_REVIEW]
+
+  # ---- Missing information and out-of-scope -----------------------------
+  - id: S065
+    title: An unknown danger sign suppresses the no-routine-measurement reassurance
+    category: missing-and-out-of-scope
+    refs: ["1.2.3", "1.5.1"]
+    input:
+      gestation: 38
+      age: 2880
+      jaundice: false
+      features: { acute_bilirubin_encephalopathy: unknown }
+    expect:
+      primary: INCOMPLETE_DANGER_ASSESSMENT
+      suppressed: [NO_ROUTINE_BILIRUBIN]
+      missing: ["/clinical_features/acute_bilirubin_encephalopathy"]
+  - id: S066
+    title: After 336 hours no treatment line exists for a measurement
+    category: missing-and-out-of-scope
+    refs: ["1.7.1"]
+    input:
+      gestation: 38
+      age: 20161
+      measurements: [{ age: 20161, value: 300, method: serum }]
+    expect:
+      primary: PROLONGED_JAUNDICE_ASSESSMENT
+      photo_relation: not_available
+      exchange_relation: not_available
+  - id: S067
+    title: The oldest supported baby (27 days 23 h 59 min) still gets prolonged-jaundice support
+    category: missing-and-out-of-scope
+    refs: ["1.7.1"]
+    input:
+      gestation: 38
+      age: 40319
+    expect:
+      primary: PROLONGED_JAUNDICE_ASSESSMENT
+  - id: S068
+    title: An unknown haemolytic-disease status blocks the IVIG conjunction
+    category: missing-and-out-of-scope
+    refs: ["1.8.1"]
+    input:
+      gestation: 38
+      age: 4200
+      features: { rhesus_haemolytic_disease: unknown }
+      measurements:
+        - { age: 4000, value: 300, method: serum }
+        - { age: 4120, value: 330, method: serum }
+      treatment: { mode: intensified_phototherapy, started: 3900 }
+    expect:
+      primary: INCREASED_KERNICTERUS_RISK
+      inactive: [IVIG_SPECIALIST_PATHWAY, IVIG_INFORMATION]
+      missing: ["/clinical_features/rhesus_haemolytic_disease"]

@@ -18,6 +18,7 @@ jobs:
         with:
           ruby-version: "3.3"
       - run: ruby spec/validate.rb
+      - run: ruby scripts/traceability-check.rb
 
   rust:
     name: Rust workspace

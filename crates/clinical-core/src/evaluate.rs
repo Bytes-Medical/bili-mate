@@ -218,10 +218,15 @@ impl Facts {
 
         // Below-line repeat eligibility (CLIN-032): clinically well, at least
         // 38 weeks, more than 24 hours old, below the phototherapy line.
+        // The spec section is "below-line monitoring BEFORE phototherapy":
+        // during treatment the phototherapy monitoring rules own the repeat
+        // interval, and after stopping the rebound rule does, so these
+        // intervals apply only with no treatment state at all.
         let eligible_term_retest = features.clinically_well.is_present()
             && gestation >= 38
             && age > 1440
-            && latest_photo_below;
+            && latest_photo_below
+            && treatment_mode == TreatmentMode::None;
 
         let mut any_serum_above_a_line = false;
         let mut any_at_or_above_photo = false;
@@ -434,7 +439,14 @@ fn activates(code: RuleCode, f: &Facts) -> bool {
         // Requires confirmed absence of both jaundice fields, never unknown
         // (PRD-008).
         NoRoutineBilirubin => f.suspected_absent && f.visible_absent,
-        RetestIntervalLocalProtocol => f.latest_photo_below && !f.eligible_term_retest,
+        // The local-protocol fallback covers untreated babies outside the
+        // 18/24-hour population; during or after treatment the phototherapy
+        // monitoring and rebound rules define the interval instead.
+        RetestIntervalLocalProtocol => {
+            f.treatment_mode == TreatmentMode::None
+                && f.latest_photo_below
+                && !f.eligible_term_retest
+        }
         AdditionalVisualInspection48h => {
             f.age < FIRST_48_HOURS_MINUTES
                 && (f.gestation < 38

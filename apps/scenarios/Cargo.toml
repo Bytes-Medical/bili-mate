@@ -1,0 +1,18 @@
+[package]
+name = "bili-mate-scenarios"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+description = "Clinical scenario validation harness (spec 09): runs the signed scenario set against the engine and exports the clinical review document."
+
+[[bin]]
+name = "bili-scenarios"
+path = "src/main.rs"
+
+[dependencies]
+clinical-core = { path = "../../crates/clinical-core" }
+hex.workspace = true
+serde = { workspace = true }
+serde_yaml = { workspace = true }
+sha2.workspace = true
