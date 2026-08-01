@@ -1,0 +1,11 @@
+[package]
+name = "bili-mate-api"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+description = "Axum HTTP service (Stage 2 milestone M3; stub in the Stage 1 build)."
+
+[dependencies]
+clinical-core = { path = "../../crates/clinical-core" }
+guideline-data = { path = "../../crates/guideline-data" }

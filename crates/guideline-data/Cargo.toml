@@ -1,0 +1,14 @@
+[package]
+name = "guideline-data"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+description = "Rule-pack schema, embedded approved pack, integrity verification and self-test vectors."
+
+[dependencies]
+clinical-core = { path = "../clinical-core" }
+serde = { workspace = true }
+serde_yaml = { workspace = true }
+sha2 = { workspace = true }
+hex = { workspace = true }
