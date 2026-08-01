@@ -25,7 +25,7 @@ fn no_routine_bilirubin_requires_confirmed_absence() {
     assert!(unknown
         .missing_information
         .iter()
-        .any(|m| m.field == "/clinical_features/suspected_or_obvious_jaundice"));
+        .any(|m| m.pointer == "/clinical_features/suspected_or_obvious_jaundice"));
 }
 
 #[test]
@@ -166,7 +166,7 @@ fn every_danger_field_unknown_is_reported() {
             outcome
                 .missing_information
                 .iter()
-                .any(|m| m.field == format!("/clinical_features/{field}")),
+                .any(|m| m.pointer == format!("/clinical_features/{field}")),
             "missing_information must list {field}"
         );
     }
@@ -455,7 +455,7 @@ fn ivig_requires_every_precondition() {
     assert!(unknown_disease
         .missing_information
         .iter()
-        .any(|m| m.field == "/clinical_features/rhesus_haemolytic_disease"));
+        .any(|m| m.pointer == "/clinical_features/rhesus_haemolytic_disease"));
 
     // Standard phototherapy: not intensified, no IVIG.
     let standard = rapid_pair(
@@ -495,7 +495,7 @@ fn prolonged_jaundice_without_conjugated_result_reports_the_gap() {
     assert!(outcome
         .missing_information
         .iter()
-        .any(|m| m.field == "/conjugated_bilirubin_umol_l"));
+        .any(|m| m.pointer == "/conjugated_bilirubin_umol_l"));
 }
 
 // ---------------------------------------------------------------------------

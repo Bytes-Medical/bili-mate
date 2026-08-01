@@ -1,5 +1,6 @@
 /target
 **/*.rs.bk
+clients/generated/
 .DS_Store
 node_modules/
 web/.next/

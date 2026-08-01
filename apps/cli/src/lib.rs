@@ -145,7 +145,7 @@ mod tests {
             .outcome
             .missing_information
             .iter()
-            .any(|m| m.field == "/clinical_features/routine_metabolic_screen_completed"));
+            .any(|m| m.pointer == "/clinical_features/routine_metabolic_screen_completed"));
     }
 
     #[test]
@@ -184,7 +184,7 @@ mod tests {
             .outcome
             .missing_information
             .iter()
-            .any(|m| m.field == "/clinical_features/infection_suspected"));
+            .any(|m| m.pointer == "/clinical_features/infection_suspected"));
     }
 
     #[test]

@@ -816,7 +816,7 @@ fn build_missing_information(assessment: &Assessment, facts: &Facts) -> Vec<Miss
     for (name, value, impact) in feature_fields {
         if value.is_unknown() {
             missing.push(MissingInformation {
-                field: format!("/clinical_features/{name}"),
+                pointer: format!("/clinical_features/{name}"),
                 code: "FIELD_UNKNOWN".into(),
                 impact: (*impact).to_string(),
             });
@@ -836,7 +836,7 @@ fn build_missing_information(assessment: &Assessment, facts: &Facts) -> Vec<Miss
     for (name, value) in risk_fields {
         if value.is_unknown() {
             missing.push(MissingInformation {
-                field: format!("/risk_factors/{name}"),
+                pointer: format!("/risk_factors/{name}"),
                 code: "FIELD_UNKNOWN".into(),
                 impact: "The 18-hour repeat-interval branch could not be selected; the 24-hour interval applies where eligible.".into(),
             });
@@ -845,7 +845,7 @@ fn build_missing_information(assessment: &Assessment, facts: &Facts) -> Vec<Miss
 
     if facts.phototherapy_active && !facts.response_comparison_available {
         missing.push(MissingInformation {
-            field: "/measurements".into(),
+            pointer: "/measurements".into(),
             code: "PHOTOTHERAPY_RESPONSE_COMPARISON_UNAVAILABLE".into(),
             impact: "The submitted history cannot compare a baseline serum result with a post-start serum result, so failure to respond to phototherapy could not be classified.".into(),
         });
@@ -853,7 +853,7 @@ fn build_missing_information(assessment: &Assessment, facts: &Facts) -> Vec<Miss
 
     if facts.prolonged_criteria_met && assessment.conjugated_bilirubin_umol_l.is_none() {
         missing.push(MissingInformation {
-            field: "/conjugated_bilirubin_umol_l".into(),
+            pointer: "/conjugated_bilirubin_umol_l".into(),
             code: "NOT_SUPPLIED".into(),
             impact: "The conjugated-bilirubin rules of the prolonged-jaundice assessment could not be evaluated.".into(),
         });

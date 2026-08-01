@@ -77,7 +77,7 @@ impl VerifiedPack {
             source_updated_on: pack.source_updated_on.clone(),
             status: match pack.status {
                 PackStatus::Draft => "draft",
-                PackStatus::Candidate => "candidate",
+                PackStatus::ClinicallyValidated => "clinically_validated",
                 PackStatus::Active => "active",
                 PackStatus::Retired => "retired",
             }

@@ -96,7 +96,7 @@ pub struct Warning {
 #[derive(Debug, Clone, PartialEq, Serialize)]
 pub struct MissingInformation {
     /// RFC 6901 JSON Pointer to the unknown or absent field.
-    pub field: String,
+    pub pointer: String,
     pub code: String,
     /// Which clinical behaviour the gap affects (CLIN-050).
     pub impact: String,

@@ -4,14 +4,22 @@ Status: Approved; milestones M0–M2 implemented (2026-08-01)
 Based on: specification `0.1.0`, rule pack `nice-cg98-2023-10-31.1`
 Date: 2026-08-01
 
-> **Progress:** M0 (workspace, CI, ADR-009/010) and the Stage 1 engineering
-> deliverables of M1–M2 are implemented: `crates/clinical-core` (exact
-> arithmetic, thresholds, full rule engine, oracle/exhaustive/boundary/
-> property test suites), `crates/guideline-data` (embedded pack, integrity
-> self-tests, pack diff tool) and `apps/cli` (`bili-eval`, validated against
-> the `spec/examples` fixtures). Stage 1 exit still requires the two-person
-> source-data reconciliation and clinical review of mathematics and
-> comparators (see risks 4 and 7). Next engineering milestone: M3 (Axum API).
+> **Progress:** M0–M3 implemented.
+> M0–M2 (Stage 1 engineering): `crates/clinical-core` (exact arithmetic,
+> thresholds, full rule engine, oracle/exhaustive/boundary/property suites),
+> `crates/guideline-data` (embedded pack, integrity self-tests, diff tool),
+> `apps/cli` (`bili-eval`). Stage 1 exit still requires the two-person
+> source-data reconciliation and clinical review (risks 4 and 7).
+> M3: `apps/api` Axum service implementing every `spec/openapi.yaml`
+> endpoint — strict JSON parsing with duplicate-key rejection, RFC 6901
+> validation errors in problem+json, per-IP rate limiting, security headers,
+> allowlisted request logging, JCS-RFC8785 decision receipts, readiness mode
+> gates — with contract tests that validate every live response against the
+> committed OpenAPI document, plus error/readiness/privacy suites. Client
+> generation (TS/Swift/Kotlin) runs as a CI job with a TypeScript consumer
+> fixture; **M3 follow-ups:** verify the client-gen job on the first CI run,
+> add Swift/Kotlin consumer fixtures, add exhaustive-enum handling to the TS
+> fixture. Next engineering milestone: M4 (Next.js reference web client).
 
 This plan turns the normative specification in [`spec/`](spec/README.md) into a sequenced engineering programme. It follows the delivery stages in [11-delivery-and-rollout](spec/11-delivery-and-rollout.md) and the ordering principle stated there: **clinical behaviour is validated before interface polish can conceal errors**. The clinical core is built and proven first, the API second, the web client third, and hardening/operations last before the governance-heavy validation stages.
 

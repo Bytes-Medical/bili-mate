@@ -43,7 +43,7 @@ pub struct RulePack {
 #[serde(rename_all = "snake_case")]
 pub enum PackStatus {
     Draft,
-    Candidate,
+    ClinicallyValidated,
     Active,
     Retired,
 }

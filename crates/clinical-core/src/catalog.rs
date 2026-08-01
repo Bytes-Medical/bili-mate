@@ -93,7 +93,7 @@ pub enum TimeUnit {
 pub struct Timeframe {
     pub unit: TimeUnit,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub exact_value: Option<u32>,
+    pub exact: Option<u32>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub minimum: Option<u32>,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -104,7 +104,7 @@ impl Timeframe {
     const fn within(maximum: u32) -> Self {
         Self {
             unit: TimeUnit::Hours,
-            exact_value: None,
+            exact: None,
             minimum: None,
             maximum: Some(maximum),
         }
@@ -112,7 +112,7 @@ impl Timeframe {
     const fn every(exact: u32) -> Self {
         Self {
             unit: TimeUnit::Hours,
-            exact_value: Some(exact),
+            exact: Some(exact),
             minimum: None,
             maximum: None,
         }
@@ -120,7 +120,7 @@ impl Timeframe {
     const fn range(minimum: u32, maximum: u32) -> Self {
         Self {
             unit: TimeUnit::Hours,
-            exact_value: None,
+            exact: None,
             minimum: Some(minimum),
             maximum: Some(maximum),
         }
